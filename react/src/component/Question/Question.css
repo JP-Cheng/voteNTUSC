@@ -1,0 +1,30 @@
+.quesContainer{
+    left: 0;
+    text-align: center;
+    width: 50vw;
+    height: 5em;
+    vertical-align: bottom;
+    background: rgba(0,0,0,0.3);
+    margin: 10px;
+    margin-left: 25vw;
+    margin-right: 25vw;
+    padding-top: 2em;
+    padding-bottom: 0;
+    border: 2px rgba(0,0,0,0.3) solid;
+}
+
+.quesContainer:hover{
+    cursor: pointer;
+    border: 2px black solid;
+    background: rgba(226, 219, 219, 0.3);
+}
+
+.question{
+    color: black;
+    vertical-align: bottom;
+    font: bold 45px Helvetica, Sans-Serif;
+    letter-spacing: -1;
+    line-height: 1em;
+    /* adjusted with respect to .quesContainer{ height:5em } */
+    padding: 0;
+}

@@ -1,0 +1,11 @@
+# dependencies
+/node_modules
+/react/node_modules
+/expressBackend/node_modules
+
+# just for demo and test
+/demoUI
+/styles.css
+
+# misc
+.DS_Store
