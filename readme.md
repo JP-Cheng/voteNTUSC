@@ -28,7 +28,7 @@ $npm start
 另外，考慮到使用者體驗，希望能將表決結果圖像化，目前考慮串接的是`chart.js`，不過還沒有弄好。
 
 ## 我的貢獻
-除了後端的express大部分是既有的程式碼之外（我在這邊只有把`cors`寫進去，以及寫死一些資料），其他全部都是我手動刻出來的（包含所有的排版跟css）。除了react跟express自帶的模組之外，另外有安裝`cors, nodemon, concurrently`等npm模組，詳情可見三個目錄底下的`package.json`。
+除了圖片都是網路上抓的、後端的express大部分是既有的程式碼之外（我在這邊只有把`cors`寫進去，以及寫死一些資料），其他全部都是我手動刻出來的（包含所有的排版跟css）。除了react跟express自帶的模組之外，另外有安裝`cors, nodemon, concurrently`等npm模組，詳情可見三個目錄底下的`package.json`。
 
 ## 心得
 網頁真的是要學很多東西，不過經過這次的專案，至少把react都摸熟了，希望之後能夠更熟悉後端以及資料流。
