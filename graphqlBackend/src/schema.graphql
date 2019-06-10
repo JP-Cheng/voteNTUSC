@@ -1,0 +1,92 @@
+type Query {
+  users(query: String): [User!]!
+  elections(query: String): [Election!]!
+  me: User
+  
+}
+
+type Mutation {
+  createUser(data: CreateUserInput!): User!
+  deleteUser: User!
+  updateUser(id: ID!, data: UpdateUserInput!): User!
+  createElection(data: CreateElectionInput!): Post
+  deleteElection(id: ID!): Post!
+  updateElection(id: ID!, data: UpdateElectionInput!): Post!
+  createBallot(data: CreateBallotInput!): Comment!
+  deleteBallot(id: ID!): Comment!
+  updateBallot(id: ID!, data: UpdateBallotInput!): Comment!
+  login(email: String!, pwd: String!): User
+  logout: Boolean
+}
+
+type Subscription {
+  comment(postId: ID!): CommentSubscriptionPayload!
+  post: PostSubscriptionPayload!
+}
+
+input CreateUserInput {
+  name: String!
+  email: String!
+  pwd: String!
+  age: Int
+}
+
+input UpdateUserInput {
+  name: String
+  email: String
+  pwd: String
+  age: Int
+}
+
+input CreateElectionInput {
+  title: String!
+  body: String!
+  published: Boolean!
+}
+
+input UpdateElectionInput {
+  title: String
+  body: String
+  published: Boolean
+}
+
+input CreateBallotInput {
+  text: String!
+  post: ID!
+}
+
+input UpdateBallotInput {
+  text: String
+}
+
+type User {
+  id: ID!
+  name: String!
+}
+
+type Election {
+  _id: ID!
+  title: String!
+  body: String!
+  open: Boolean!
+  ballots: [Ballot]!
+  voters: [User!]!
+  voted: [User]!
+}
+
+type Ballot {
+  _id: ID!
+  Election: ID!
+  choice: Int!
+}
+
+enum MutationType {
+  CREATED
+  UPDATED
+  DELETED
+}
+
+type ElectionSubscriptionPayload {
+  mutation: MutationType!
+  data: Election!
+}
