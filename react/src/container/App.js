@@ -2,6 +2,7 @@ import React from 'react';
 import MainPage from './Pages/MainPage'
 import ChooseQues from './Pages/ChooseQues'
 import QuesPage from './Pages/QuesPage'
+import LaunchQues from './Pages/LaunchQues'
 
 import ResultChart from './Pages/ResultChart'
 import Dashboard from './Pages/Dashboard'
@@ -41,7 +42,7 @@ class App extends React.Component {
             <Route exact path="/" component={TopImg}></Route>
             <Route exact path="/vote" component={QuesPage}></Route>
             <Route path="/vote/afterPage" component={afterPage}></Route>
-            <Route path="/ChooseQues" component={ChooseQues}></Route>
+            <Route path="/ChooseQues" component={LaunchQues}></Route>
             <Route path="/hist" component={ChooseQues}></Route>
             <Route path="/result" render={() => (<ResultChart text={"some text"} />)}></Route>
           </Switch>
