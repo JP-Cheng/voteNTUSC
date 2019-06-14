@@ -1,6 +1,5 @@
 import { GraphQLServer, PubSub } from 'graphql-yoga'
-import mongoose from 'mongoose'
-import session from 'express-session'
+import jwt from 'jsonwebtoken'
 import cors from 'cors'
 import db from './db'
 import Query from './resolvers/Query'
@@ -10,8 +9,8 @@ import User from './resolvers/User'
 import Election from './resolvers/Election'
 import Ballot from './resolvers/Ballot'
 
-const MongoStorage = require('connect-mongo')(session);
 const pubsub = new PubSub()
+require('dotenv').config();
 
 const server = new GraphQLServer({
   typeDefs: './src/schema.graphql',
@@ -23,11 +22,22 @@ const server = new GraphQLServer({
     Election,
     Ballot
   },
-  context: req => ({
-    db,
-    pubsub,
-    req: req.request
-  })
+  context: async req => {
+    let token = null;
+    if(req && req.request && req.request.headers) {
+      token = req.request.headers["x-token"];
+    }
+    let me = null;
+    if (token) {
+      me = await jwt.verify(token, process.env.JWT_SECRET)
+    }
+    return {
+      me,
+      db,
+      pubsub,
+      req: req.request
+    }
+  }
 })
 
 let corsOptions = {
@@ -36,13 +46,6 @@ let corsOptions = {
 };
 
 server.express.use(cors(corsOptions));
-server.express.use(session({
-    store: new MongoStorage({mongooseConnection: mongoose.connection}),
-    secret: `this_is_my_secret_for_this_express-session`,
-    resave: false,
-    saveUninitialized: false,
-    cookie: { maxAge: 60*60*1000 }
-}))
 
 server.start({ cors: {credentials: true, origin: false}, port: process.env.PORT | 4000 }, () => {
   console.log(`The server is up on port ${process.env.PORT | 4000}!`)

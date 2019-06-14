@@ -11,12 +11,12 @@ const ElectionSchema = new Schema({
 	  type: String,
 	  required: [true, 'Body is required.']
   },
-  open: {
-    type: Boolean,
+  creator: {
+    type: ObjectId,
     required: [true]
   },
-  ballots: {
-    type: [ObjectId],
+  open: {
+    type: Boolean,
     required: [true]
   },
   voters: {

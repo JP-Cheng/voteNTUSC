@@ -1,73 +1,63 @@
 type Query {
-  users(query: String): [User!]!
-  elections(query: String): [Election!]!
-  me: User
+  users(query: String): [User]!
+  elections(query: String): [Election]!
+  election(electionId: ID!): Election!
+  ballots(electionId: ID!): [Ballot]!
+  ballot(ballotId: ID!):  Ballot
+  me: User!
   
 }
 
 type Mutation {
-  createUser(data: CreateUserInput!): User!
+  createUser(name: String!, email: String!, pwd: String!): User!
   deleteUser: User!
-  updateUser(id: ID!, data: UpdateUserInput!): User!
-  createElection(data: CreateElectionInput!): Post
-  deleteElection(id: ID!): Post!
-  updateElection(id: ID!, data: UpdateElectionInput!): Post!
-  createBallot(data: CreateBallotInput!): Comment!
-  deleteBallot(id: ID!): Comment!
-  updateBallot(id: ID!, data: UpdateBallotInput!): Comment!
-  login(email: String!, pwd: String!): User
-  logout: Boolean
+  updateUser(name: String, email: String, pwd: String): User!
+  createElection(data: CreateElectionInput!): Election!
+  deleteElection(id: ID!): ID!
+  updateElection(id: ID!, data: UpdateElectionInput!): Election!
+  createBallot(data: CreateBallotInput!): Ballot!
+  login(email: String!, pwd: String!): Token!
 }
 
 type Subscription {
-  comment(postId: ID!): CommentSubscriptionPayload!
-  post: PostSubscriptionPayload!
+  ballots(electionId: ID!): BallotsSubscriptionPayload!
+  elections: ElectionsSubscriptionPayload!
 }
 
-input CreateUserInput {
-  name: String!
-  email: String!
-  pwd: String!
-  age: Int
-}
-
-input UpdateUserInput {
-  name: String
-  email: String
-  pwd: String
-  age: Int
-}
 
 input CreateElectionInput {
   title: String!
   body: String!
-  published: Boolean!
+  open: Boolean!
+  voters: [ID!]!
 }
 
 input UpdateElectionInput {
   title: String
   body: String
-  published: Boolean
+  open: Boolean
+  voters: [ID!]
 }
 
 input CreateBallotInput {
-  text: String!
-  post: ID!
-}
-
-input UpdateBallotInput {
-  text: String
+  electionId: ID!
+  choice: Int!
 }
 
 type User {
   id: ID!
   name: String!
+  email: String!
+  createdElections: [Election]!
+  voteableElections: [Election]!
+  votedElections: [Election]!
 }
 
 type Election {
-  _id: ID!
+  id: ID!
   title: String!
   body: String!
+  creator: User!
   open: Boolean!
   ballots: [Ballot]!
   voters: [User!]!
@@ -75,9 +65,13 @@ type Election {
 }
 
 type Ballot {
-  _id: ID!
-  Election: ID!
+  id: ID!
+  election: Election!
   choice: Int!
+}
+
+type Token {
+  token: String!
 }
 
 enum MutationType {
@@ -86,7 +80,13 @@ enum MutationType {
   DELETED
 }
 
-type ElectionSubscriptionPayload {
+type ElectionsSubscriptionPayload {
   mutation: MutationType!
-  data: Election!
+  electionId: ID!
+  data: Election
+}
+
+type BallotsSubscriptionPayload {
+  mutation: MutationType!
+  data: Ballot!
 }
