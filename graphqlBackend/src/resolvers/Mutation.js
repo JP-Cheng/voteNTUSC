@@ -39,8 +39,7 @@ const Mutation = {
     // Delete user elections
     const deletedUserElections = await db.elections.find({creator: me._id})
     deletedUserElections.map(election => _deleteElection(election._id, db, pubsub));
-    // Logout
-    //!! req.session.destroy();
+    
     deletedUser.pwdHash = null;
     return deletedUser;
   },

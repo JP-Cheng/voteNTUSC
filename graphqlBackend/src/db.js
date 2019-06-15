@@ -5,7 +5,13 @@ const users = require("./models/users");
 require('dotenv').config();
 
 // Connect to mongo
-const mongoUrl = process.env.DB_URL;
+let url = "";
+if(process.env.NODE_ENV === "test") {
+  url = process.env.TEST_DB_URL;
+  console.log("Connecting to testing DB");
+}
+else url = process.env.DB_URL
+const mongoUrl = url;
 
 mongoose.connect(mongoUrl, {useNewUrlParser: true});
 
