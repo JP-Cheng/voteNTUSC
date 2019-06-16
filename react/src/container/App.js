@@ -1,4 +1,5 @@
 import React from 'react';
+import { BrowserRouter, Route, NavLink, Switch } from 'react-router-dom'
 import MainPage from './Pages/MainPage'
 import ChooseQues from './Pages/ChooseQues'
 import QuesPage from './Pages/QuesPage'
@@ -13,9 +14,11 @@ import Option from '../component/Option/Option'
 import vote from '../component/Option/vote.png'
 import result from '../component/Option/result.png'
 import hist from '../component/Option/hist.png'
+import Register from '../component/navbar/Register'
+import Login from '../component/navbar/Login'
 import logout from '../component/Option/logout.png'
-import { BrowserRouter, Route, NavLink, Switch } from 'react-router-dom'
 import './App.css';
+import Navbar from '../component/navbar'
 
 class App extends React.Component {
 
@@ -35,17 +38,23 @@ class App extends React.Component {
   render() {
     return (
       <div className="App" id="App">
-
+        
+        
         <BrowserRouter basename="">
+          <Navbar className="top" />
 
-          <Switch>
-            <Route exact path="/" component={TopImg}></Route>
-            <Route exact path="/vote" component={QuesPage}></Route>
-            <Route path="/vote/afterPage" component={afterPage}></Route>
-            <Route path="/ChooseQues" component={LaunchQues}></Route>
-            <Route path="/hist" component={ChooseQues}></Route>
-            <Route path="/result" render={() => (<ResultChart text={"some text"} />)}></Route>
-          </Switch>
+          <div className="main">
+            <Switch>
+              <Route exact path="/" component={TopImg}></Route>
+              <Route exact path="/vote" component={QuesPage}></Route>
+              <Route exact path="/login"><Login /></Route>
+              <Route exact path="/register"><Register /></Route>
+              <Route path="/vote/afterPage" component={afterPage}></Route>
+              <Route path="/ChooseQues" component={LaunchQues}></Route>
+              <Route path="/hist" component={ChooseQues}></Route>
+              <Route path="/result" render={() => (<ResultChart text={"some text"} />)}></Route>
+            </Switch>
+          </div>
 
           <div className="bottomBar" >
 
