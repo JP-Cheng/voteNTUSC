@@ -11,7 +11,7 @@ const findElection = async (db, id) => {
   if(!id) throw new Error("FindElection Error: ID Is Missing");
   return await db.elections.findById(id)
   .then(_election => {
-    if(!_election) throw new Error('Election not found');
+    if(!_election) throw new Error('FindElection Error: Election Not Found');
     else return _election;
   })
   .catch(err => {throw err});
@@ -37,7 +37,6 @@ const _deleteBallot = async (id, db, pubsub=null) => {
 }
 
 const _deleteElection = async (id, db, pubsub) => {
-  if(!id) throw new Error("DeleteElection Error: ID Is Missing");
   const election = await db.elections.findByIdAndDelete(id)
   .then(_election => {
     if(!_election) throw new Error("Election not found.");

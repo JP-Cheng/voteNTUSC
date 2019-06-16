@@ -1,3 +1,5 @@
+import bcrypt from 'bcrypt'
+
 const cleanUsers = db => {
   db.users.deleteMany({}).exec();
 }
@@ -16,4 +18,10 @@ const cleanDB = db => {
   cleanElections(db);
 }
 
-export {cleanDB, cleanUsers, cleanBallots, cleanElections};
+const getHash = async data => {
+  return await bcrypt.hash(data, 10)
+  .then(hashed => hashed)
+  .catch(err => {throw err});
+}
+
+export {cleanDB, cleanUsers, cleanBallots, cleanElections, getHash};

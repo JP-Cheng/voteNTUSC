@@ -44,6 +44,7 @@ const Mutation = {
     return deletedUser;
   },
   async updateUser(parent, args, { me, db }, info) {
+    if(!me) throw new Error("UpdateUser Error: Not Login");
     const { name, email, pwd } = args
     const user = await findUser(db, me._id);
 
@@ -107,8 +108,15 @@ const Mutation = {
     
     return election;
   },
-  deleteElection(parent, args, { db, pubsub }, info) {
-    return _deleteElection(args.id, db, pubsub);
+  async deleteElection(parent, args, { me, db, pubsub }, info) {
+    if(!me) throw new Error("DeleteElection Error: Not Login")
+    return await db.elections.findById(args.id)
+    .then(found => {
+      if(!found) throw new Error("DeleteElection Error: Election Not Found");
+      if(me._id !== found.creator.toString()) throw new Error("DeleteElection Error: Not Creator")
+      return _deleteElection(args.id, db, pubsub);
+    })
+    .catch(err => {throw err});
   },
   async updateElection(parent, args, { me, db, pubsub }, info) {
     const { id, data } = args
@@ -116,12 +124,12 @@ const Mutation = {
 
     let election = await findElection(db, id);
     if(election.creator.toString() !== me._id) throw new Error("UpdateElection Error: Not Creator");
-    if(election.voted.length !== 0) throw new Error("UpdateElection Error: Election Already Started")
+    if(election.voted.length !== 0 && (title || body || voters || open)) throw new Error("UpdateElection Error: Election Already Started")
 
     if (typeof title === 'string') {
       await db.elections.findOne({title: title})
       .then(_election => {
-        if(_election) throw new Error("UpdateElection Error: Title Already Exist")
+        if(_election && _election._id !== id) throw new Error("UpdateElection Error: Title Already Exist")
       })
       .catch(err => {throw err});
 
@@ -160,6 +168,9 @@ const Mutation = {
     if (!election.open) {
       throw new Error('CreateBallot Error: Election Not Open');
     }
+    if(election.voters.findIndex(_voters => _voters.toString() === me._id) === -1) {
+      throw new Error('CreateBallot Error: User Not In Voters');
+    }
     if(election.voted.findIndex(_Voted => _Voted.toString() === me._id) !== -1) {
       throw new Error('CreateBallot Error: User Already Voted');
     }
@@ -167,7 +178,9 @@ const Mutation = {
     const newBallot = db.ballots({election: election._id, choice: choice});
     await newBallot.save()
     .catch(err => {throw err});
+    
     election.voted.push(me._id);
+    election.markModified('voted');
     await election.save()
     .catch(err => {throw err});
     pubsub.publish(`ballot ${election._id}`, {
