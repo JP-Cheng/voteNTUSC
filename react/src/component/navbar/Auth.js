@@ -31,9 +31,9 @@ const loggedIn = () => {
                   Hello, <Link to="/user">{name}</Link>
               </NavItem>
               <NavItem className={classes.item}>
-                <Link to="/" onClick={() => {
+                <Link to="/redirect" onClick={() => {
                     console.log("Logged out");
-                    localStorage.setItem('token', '');
+                    localStorage.setItem('token', '');              
                 }}>
                   Logout
                 </Link>
@@ -47,7 +47,7 @@ const loggedIn = () => {
 }
 
 const Auth = () => {
-  return( 
+  return(
     <React.Fragment>
       {
         localStorage['token']
@@ -57,7 +57,7 @@ const Auth = () => {
           notLoggedIn
       }
     </React.Fragment>
-  );
+  )
 }
 
 export default Auth

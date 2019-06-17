@@ -12,14 +12,15 @@ import { Redirect } from 'react-router-dom'
 import classes from './Auth.module.css'
 import { LOGIN_MUTATION } from '../../graphql'
 
-const LoginForm = props => {
-  let email, pwd;
-  return (
-    <Mutation mutation={LOGIN_MUTATION}>
+class LoginForm extends React.Component {
+  render() {
+    let email, pwd;
+    return (
+      <Mutation mutation={LOGIN_MUTATION}>
       {(login, { data, error }) => {
         if(data && data.login) {
             localStorage.setItem('token', data.login.token);
-            return <Redirect to="/" />;
+            return <Redirect to="/redirect" />;
         }
         return (
           <Form 
@@ -44,7 +45,8 @@ const LoginForm = props => {
           </Form>
       )}}
     </Mutation>
-  )
+    )
+  }
 }
 
 export default LoginForm;

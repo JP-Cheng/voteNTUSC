@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter, Route, NavLink, Switch } from 'react-router-dom'
+import { BrowserRouter, Route, NavLink, Switch, Redirect } from 'react-router-dom'
 import MainPage from './Pages/MainPage'
 import ChooseQues from './Pages/ChooseQues'
 import QuesPage from './Pages/QuesPage'
@@ -53,6 +53,12 @@ class App extends React.Component {
               <Route path="/ChooseQues" component={LaunchQues}></Route>
               <Route path="/hist" component={ChooseQues}></Route>
               <Route path="/result" render={() => (<ResultChart text={"some text"} />)}></Route>
+              <Route path="/redirect/">
+                {() => {
+                  this.forceUpdate();
+                  return <Redirect to="/" />;
+                }}
+              </Route>
             </Switch>
           </div>
 
