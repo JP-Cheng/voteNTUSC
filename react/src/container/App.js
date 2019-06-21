@@ -1,12 +1,12 @@
 import React from 'react';
 import { BrowserRouter, Route, NavLink, Switch, Redirect } from 'react-router-dom'
-import MainPage from './Pages/MainPage'
 import ChooseQues from './Pages/ChooseQues'
-import QuesPage from './Pages/QuesPage'
 import LaunchQues from './Pages/LaunchQues'
-
 import ResultChart from './Pages/ResultChart'
-import Dashboard from './Pages/Dashboard'
+
+//import MainPage from './Pages/MainPage'
+//import QuesPage from './Pages/QuesPage'
+//import Dashboard from './Pages/Dashboard'
 
 import afterPage from '../component/afterVote'
 import TopImg from '../component/TopImg/TopImg'
@@ -19,6 +19,7 @@ import Login from '../component/navbar/Login'
 import logout from '../component/Option/logout.png'
 import './App.css';
 import Navbar from '../component/navbar'
+import { View, Vote, Create } from './Election'
 
 class App extends React.Component {
 
@@ -46,17 +47,18 @@ class App extends React.Component {
           <div className="main">
             <Switch>
               <Route exact path="/" component={TopImg}></Route>
-              <Route exact path="/vote" component={QuesPage}></Route>
+              <Route exact path="/vote"><View /></Route>
               <Route exact path="/login"><Login /></Route>
               <Route exact path="/register"><Register /></Route>
+              <Route exact path="/create"><Create /></Route>
+              <Route path="/vote/:id">{({match}) => <Vote electionId={match.params.id} />}</Route>
               <Route path="/vote/afterPage" component={afterPage}></Route>
-              <Route path="/ChooseQues" component={LaunchQues}></Route>
               <Route path="/hist" component={ChooseQues}></Route>
               <Route path="/result" render={() => (<ResultChart text={"some text"} />)}></Route>
-              <Route path="/redirect/">
-                {() => {
+              <Route path="/redirect/:name">
+                {({match}) => {
                   this.forceUpdate();
-                  return <Redirect to="/" />;
+                  return <Redirect to={"/"+match.params.name} />;
                 }}
               </Route>
             </Switch>
@@ -72,7 +74,7 @@ class App extends React.Component {
               <Option src={result} scale={100} />
             </NavLink>
 
-            <NavLink activeClassName="selected" to="/ChooseQues">
+            <NavLink activeClassName="selected" to="/create">
               <Option src={hist} scale={100} />
             </NavLink>
 

@@ -30,9 +30,9 @@ mutation updateUser($name: String, $email: String, $pwd: String) {
 `
 
 const CREATE_ELECTION_MUTATION = gql`
-mutation createElection($title: String!, $body: String!, $open: Boolean!, $voters: [ID!]!) {
-  createElection(data: {title: $title, body: $body, open: $open, voters: $voters}) {
-    id title body open 
+mutation createElection($title: String!, $body: String!, $choices: [String!]!, $open: Boolean!, $voters: [ID!]!) {
+  createElection(data: {title: $title, body: $body, choices: $choices, open: $open, voters: $voters}) {
+    id title body choices open 
     creator {
       id name
     } 
@@ -56,9 +56,9 @@ mutation deleteElection($id: ID!) {
 `
 
 const UPDATE_ELECTION_MUTATION = gql`
-mutation updateElection($id: ID!, $title: String, $body: String, $open: Boolean, $voters: [ID!]) {
-  updateElection(id: $id, data: {title: $title, body: $body, open: $open, voters: $voters}) {
-    id title body open
+mutation updateElection($id: ID!, $title: String, $body: String, $choices: [String!], $open: Boolean, $voters: [ID!]) {
+  updateElection(id: $id, data: {title: $title, body: $body, choices: $choices, open: $open, voters: $voters}) {
+    id title body choices open
     creator {
       id
     }

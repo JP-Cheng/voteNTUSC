@@ -26,6 +26,7 @@ const ELECTIONS_QUERY = gql`
       title
       body
       open
+      choices
       creator {
         id name
       }
@@ -43,12 +44,13 @@ const ELECTIONS_QUERY = gql`
 `
 
 const ELECTION_QUERY = gql`
-  query elections($electionId: ID!) {
+  query election($electionId: ID!) {
     election(electionId: $electionId) {
       id
       title
       body
       open
+      choices
       creator {
         id name
       }

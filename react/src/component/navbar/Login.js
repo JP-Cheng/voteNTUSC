@@ -26,8 +26,8 @@ class LoginForm extends React.Component {
           <Form 
             className={classes.form}
             onSubmit={e => {
-                e.preventDefault();
-                login({variables: { email: email, pwd: pwd}});
+              e.preventDefault();
+              login({variables: { email: email, pwd: pwd}});
             }}
           >
             {error?<Alert color="danger">Login Fail!</Alert>:null}

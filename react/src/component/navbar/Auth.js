@@ -23,8 +23,13 @@ const loggedIn = () => {
   return (
     <Nav className="ml-auto" navbar>
       <Query query={ME_QUERY}>
-        {({data}) => {
-          const name = (data&&data.me)?data.me.name:""
+        {({data, error}) => {
+          if(error) {
+            console.error(error);
+            return notLoggedIn;
+          }
+          const name = (data&&data.me)?data.me.name:"";
+          if(data&&data.me) localStorage.setItem('uid', data.me.id);
           return (
             <React.Fragment>
               <NavItem className={classes.item}>

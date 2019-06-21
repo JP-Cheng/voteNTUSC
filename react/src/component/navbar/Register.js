@@ -13,7 +13,7 @@ import classes from './Auth.module.css'
 import { REGISTER_MUTATION } from '../../graphql'
 
 const RegisterForm = props => {
-  let email, pwd, name, age;
+  let email, pwd, name;
   return (
     <Mutation mutation={REGISTER_MUTATION}>
       {(createUser, { data, error }) => {
