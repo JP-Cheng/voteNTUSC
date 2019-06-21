@@ -29,7 +29,12 @@ const server = new GraphQLServer({
     }
     let me = null;
     if (token) {
-      me = await jwt.verify(token, process.env.JWT_SECRET)
+      try {
+        me = await jwt.verify(token, process.env.JWT_SECRET)
+      }
+      catch {
+        me = null;
+      }
     }
     return {
       me,

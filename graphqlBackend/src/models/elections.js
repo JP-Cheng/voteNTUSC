@@ -11,6 +11,10 @@ const ElectionSchema = new Schema({
 	  type: String,
 	  required: [true, 'Body is required.']
   },
+  choices: {
+    type: [String],
+    required: [true]
+  },
   creator: {
     type: ObjectId,
     required: [true]

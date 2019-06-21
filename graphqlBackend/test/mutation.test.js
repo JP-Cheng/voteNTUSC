@@ -28,9 +28,9 @@ const mutations = {
     }
   `,
   createElection: `
-    mutation createElection($title: String!, $body: String!, $open: Boolean!, $voters: [ID!]!) {
-      createElection(data: {title: $title, body: $body, open: $open, voters: $voters}) {
-        id title body open 
+    mutation createElection($title: String!, $body: String!, $choices: [String!]!, $open: Boolean!, $voters: [ID!]!) {
+      createElection(data: {title: $title, body: $body, choices: $choices, open: $open, voters: $voters}) {
+        id title body choices open 
         creator {
           id name
         } 
@@ -52,9 +52,9 @@ const mutations = {
     }
   `,
   updateElection: `
-    mutation updateElection($id: ID!, $title: String, $body: String, $open: Boolean, $voters: [ID!]) {
-      updateElection(id: $id, data: {title: $title, body: $body, open: $open, voters: $voters}) {
-        id title body open
+    mutation updateElection($id: ID!, $title: String, $body: String, $choices: [String!], $open: Boolean, $voters: [ID!]) {
+      updateElection(id: $id, data: {title: $title, body: $body, open: $open, choices: $choices, voters: $voters}) {
+        id title body choices open
         creator {
           id
         }
@@ -89,6 +89,8 @@ const mutations = {
     }
   `
 }
+
+const expiredToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1ZDAzODI3NDMzZGFhZjU5ZTNkMjc4YTciLCJlbWFpbCI6ImRhdmlkQGV4YW1wbGUuY29tIiwibmFtZSI6IkRhdmlkIiwicHdkSGFzaCI6IiQyYiQxMCRLVFNmdmNvZWU5eFdRejJrRU5OMDdPMWlqQUYuaWZ2ZGw0cVRETy9kdFllLmMzZHlTYWNzVyIsIl9fdiI6MCwiaWF0IjoxNTYwNTE4NTg5LCJleHAiOjE1NjA2MDQ5ODl9.9BdeJNbuy-v2syvdSQGWKGCb-vWF41O_45b5hCehHLs"
 
 // returns a function with tests
 const mutationTests = db => () => {
@@ -268,7 +270,7 @@ const mutationTests = db => () => {
     })
 
     it('CreateElection should check login state', async () => {
-      const newElection = {title: "Test election", body: "Hello world", open: true, voters: _users.map(user => user.id)}
+      const newElection = {title: "Test election", body: "Hello world", choices: ["A", "B", "C"], open: true, voters: _users.map(user => user.id)}
       await request(endpoint, mutations.createElection, newElection)
       .then(result => {assert.isUndefined(result)})
       .catch(err => {
@@ -284,7 +286,7 @@ const mutationTests = db => () => {
       const client = new GraphQLClient(endpoint, {
         headers: {'x-token': _users[0].token}
       });
-      const newElection = {title: "Test election", body: "Hello world", open: true, voters: _users.map(user => user.id.toString())}
+      const newElection = {title: "Test election", body: "Hello world", choices: ["A", "B", "C"], open: true, voters: _users.map(user => user.id.toString())}
       const electionId = await client.request(mutations.createElection, newElection)
       .then(data => {
         assert.isObject(data);
@@ -292,6 +294,7 @@ const mutationTests = db => () => {
         assert.isAbove(data.createElection.id.length, 1);
         expect(data.createElection).to.deep.include({title: newElection.title, body: newElection.body, open: newElection.open});
         expect(data.createElection.voters.map(voter => voter.id)).to.have.members(newElection.voters);
+        expect(data.createElection.choices).to.eql(newElection.choices);
         assert.strictEqual(data.createElection.creator.id, _users[0].id);
         assert.lengthOf(data.createElection.ballots, 0);
         assert.lengthOf(data.createElection.voted, 0);
@@ -301,6 +304,7 @@ const mutationTests = db => () => {
       .then(found => {
         assert.isObject(found);
         expect(found).to.deep.include({title: newElection.title, body: newElection.body, open: newElection.open});
+        expect(found.choices).to.eql(newElection.choices);
         expect(found.voters.map(voter => voter.toString())).to.have.members(newElection.voters);
         assert.lengthOf(found.voted, 0);
         assert.strictEqual(found.creator.toString(), _users[0].id);
@@ -311,7 +315,7 @@ const mutationTests = db => () => {
       const client = new GraphQLClient(endpoint, {
         headers: {'x-token': _users[0].token}
       });
-      const newElection = {title: "Test election", body: "Hello world", open: true, voters: _users.map(user => user.id.toString())}
+      const newElection = {title: "Test election", body: "Hello world", choices: ["A", "B", "C"], open: true, voters: _users.map(user => user.id.toString())}
       
       await client.request(mutations.createElection, newElection)
       .then(res => res);
@@ -328,7 +332,7 @@ const mutationTests = db => () => {
       const client = new GraphQLClient(endpoint, {
         headers: {'x-token': _users[0].token}
       });
-      const newElection = {title: "Test election", body: "Hello world", open: true, voters: _users.map(user => user.id.toString())}
+      const newElection = {title: "Test election", body: "Hello world", choices: ["A", "B", "C"], open: true, voters: _users.map(user => user.id.toString())}
       const electionId = await client.request(mutations.createElection, newElection)
       .then(data => data.createElection.id);
       const client2 = new GraphQLClient(endpoint, {
@@ -360,7 +364,7 @@ const mutationTests = db => () => {
       const client = new GraphQLClient(endpoint, {
         headers: {'x-token': _users[0].token}
       });
-      const newElection = {title: "Test election", body: "Hello world", open: true, voters: _users.map(user => user.id.toString())}
+      const newElection = {title: "Test election", body: "Hello world", choices: ["A", "B", "C"], open: true, voters: _users.map(user => user.id.toString())}
       const electionId = await client.request(mutations.createElection, newElection)
       .then(data => data.createElection.id);
       await client.request(mutations.deleteElection, {id: electionId})
@@ -376,7 +380,7 @@ const mutationTests = db => () => {
       const client = new GraphQLClient(endpoint, {
         headers: {'x-token': _users[0].token}
       });
-      const newElection = {title: "Test election", body: "Hello world", open: true, voters: _users.map(user => user.id.toString())}
+      const newElection = {title: "Test election", body: "Hello world", choices: ["A", "B", "C"], open: true, voters: _users.map(user => user.id.toString())}
       const electionId = await client.request(mutations.createElection, newElection)
       .then(data => data.createElection.id);
       const client2 = new GraphQLClient(endpoint, {
@@ -408,7 +412,7 @@ const mutationTests = db => () => {
       const client = new GraphQLClient(endpoint, {
         headers: {'x-token': _users[0].token}
       });
-      const newElection = {title: "Test election", body: "Hello world", open: true, voters: _users.map(user => user.id.toString())}
+      const newElection = {title: "Test election", body: "Hello world", choices: ["A", "B", "C"], open: true, voters: _users.map(user => user.id.toString())}
      
       const electionId = await client.request(mutations.createElection, newElection)
       .then(data => data.createElection.id);
@@ -441,7 +445,7 @@ const mutationTests = db => () => {
       const client = new GraphQLClient(endpoint, {
         headers: {'x-token': _users[0].token}
       });
-      const newElection = {title: "Test election", body: "Hello world", open: true, voters: _users.map(user => user.id.toString())}
+      const newElection = {title: "Test election", body: "Hello world", choices: ["A", "B", "C"], open: true, voters: _users.map(user => user.id.toString())}
       
       const electionId = await client.request(mutations.createElection, newElection)
       .then(data => data.createElection.id);
@@ -461,17 +465,18 @@ const mutationTests = db => () => {
       const client = new GraphQLClient(endpoint, {
         headers: {'x-token': _users[0].token}
       });
-      const newElection = {title: "Test election", body: "Hello world", open: true, voters: _users.map(user => user.id.toString())}
+      const newElection = {title: "Test election", body: "Hello world", choices: ["A", "B", "C"], open: true, voters: _users.map(user => user.id.toString())}
       
       const electionId = await client.request(mutations.createElection, newElection)
       .then(data => data.createElection.id);
 
-      await client.request(mutations.updateElection, {id: electionId, title: "HaHa", body: "LaLa", open: false, voters: [_users[1].id]})
+      await client.request(mutations.updateElection, {id: electionId, title: "HaHa", body: "LaLa", choices: ["D", "E", "F"], open: false, voters: [_users[1].id]})
       .then(res => {
         assert.isObject(res);
         assert.isObject(res.updateElection);
         assert.strictEqual(res.updateElection.title, "HaHa");
         assert.strictEqual(res.updateElection.body, "LaLa");
+        expect(res.updateElection.choices).to.eql(["D", "E", "F"]);
         assert.isFalse(res.updateElection.open);
         expect(res.updateElection.voters.map(voter => voter.id.toString())).to.have.members([_users[1].id.toString()])
       })
@@ -485,6 +490,7 @@ const mutationTests = db => () => {
         assert.isNotNull(found);
         assert.strictEqual(found.title, "HaHa");
         assert.strictEqual(found.body, "LaLa");
+        expect(found.choices).to.eql(["D", "E", "F"]);
         assert.isFalse(found.open);
         expect(found.voters.map(id => id.toString())).to.have.members([_users[1].id.toString()]);
       })
@@ -498,7 +504,7 @@ const mutationTests = db => () => {
       const client = new GraphQLClient(endpoint, {
         headers: {'x-token': _users[0].token}
       });
-      const newElection = {title: "Test election", body: "Hello world", open: true, voters: _users.map(user => user.id.toString())}
+      const newElection = {title: "Test election", body: "Hello world", choices: ["A", "B", "C"], open: true, voters: _users.map(user => user.id.toString())}
       
       const electionId = await client.request(mutations.createElection, newElection)
       .then(data => data.createElection.id);
@@ -542,9 +548,9 @@ const mutationTests = db => () => {
     ];
 
     let _elections = [
-      {title: "Open election", body: "Hello world", open: true},
-      {title: "Closed election", body: "Hello world", open: false},
-      {title: "User1 election", body: "Hello world", open: true}
+      {title: "Open election", body: "Hello world", choices: ["A", "B", "C"], open: true},
+      {title: "Closed election", body: "Hello world", choices: ["A", "B", "C"], open: false},
+      {title: "User1 election", body: "Hello world", choices: ["A", "B", "C"], open: true}
     ]
 
 

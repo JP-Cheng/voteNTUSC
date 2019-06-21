@@ -28,6 +28,7 @@ type Subscription {
 input CreateElectionInput {
   title: String!
   body: String!
+  choices: [String!]!
   open: Boolean!
   voters: [ID!]!
 }
@@ -35,6 +36,7 @@ input CreateElectionInput {
 input UpdateElectionInput {
   title: String
   body: String
+  choices: [String!]
   open: Boolean
   voters: [ID!]
 }
@@ -57,6 +59,7 @@ type Election {
   id: ID!
   title: String!
   body: String!
+  choices: [String!]!
   creator: User!
   open: Boolean!
   ballots: [Ballot]!

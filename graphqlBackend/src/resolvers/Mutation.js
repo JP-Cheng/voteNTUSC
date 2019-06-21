@@ -120,9 +120,10 @@ const Mutation = {
   },
   async updateElection(parent, args, { me, db, pubsub }, info) {
     const { id, data } = args
-    const { title, body, open, voters } = data;
+    const { title, body, choices, open, voters } = data;
 
     let election = await findElection(db, id);
+    if(!me) throw new Error("UpdateElection Error: Not Login");
     if(election.creator.toString() !== me._id) throw new Error("UpdateElection Error: Not Creator");
     if(election.voted.length !== 0 && (title || body || voters || open)) throw new Error("UpdateElection Error: Election Already Started")
 
@@ -138,6 +139,10 @@ const Mutation = {
 
     if (typeof body === 'string') {
       election.body = body;
+    }
+
+    if(Array.isArray(choices)) {
+      election.choices = choices;
     }
 
     if (typeof open === 'boolean') {
