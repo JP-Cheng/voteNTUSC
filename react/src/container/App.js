@@ -1,9 +1,9 @@
 import React from 'react';
 import { BrowserRouter, Route, NavLink, Switch, Redirect } from 'react-router-dom'
 import ChooseQues from './Pages/ChooseQues'
-import LaunchQues from './Pages/LaunchQues'
 import ResultChart from './Pages/ResultChart'
 
+//import LaunchQues from './Pages/LaunchQues'
 //import MainPage from './Pages/MainPage'
 //import QuesPage from './Pages/QuesPage'
 //import Dashboard from './Pages/Dashboard'

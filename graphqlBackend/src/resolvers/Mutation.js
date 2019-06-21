@@ -81,6 +81,7 @@ const Mutation = {
   async createElection(parent, args, { me, db, pubsub, req }, info) {
     console.log("Creating Election...")
     if(!me) throw new Error("CreateElection Error: Not Login");
+    if(args.data.voters.length === 0) throw new Error("CreateElection Error: No Voters");
     
     await db.elections.findOne({title: args.data.title})
     .then(_election => {
