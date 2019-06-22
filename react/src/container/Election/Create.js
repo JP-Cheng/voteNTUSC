@@ -12,7 +12,7 @@ import {
   InputGroupText
 } from 'reactstrap'
 import { NavLink } from 'react-router-dom'
-import { CREATE_ELECTION_MUTATION, USERS_QUERY } from '../../graphql'
+import { CREATE_ELECTION_MUTATION, UPDATE_ELECTION_MUTATION, USERS_QUERY } from '../../graphql'
 
 const Choices = props => {
   return (
@@ -32,12 +32,12 @@ const Choices = props => {
 class CreateElection extends React.Component {
   constructor(props) {
     super(props);
-    this.title = null;
-    this.body  = null;
-    this.open  = false;
+    this.title = props.new?null:props.title;
+    this.body  = props.new?null:props.body;
+    this.open  = props.new?false:props.open;
     this.users = [];
     this.state = {
-      choices: [""]
+      choices: props.new?[""]:props.choices
     };
   }
   
@@ -65,7 +65,7 @@ class CreateElection extends React.Component {
 
   render () {
     return (
-      <Mutation mutation={CREATE_ELECTION_MUTATION}>
+      <Mutation mutation={this.props.new?CREATE_ELECTION_MUTATION:UPDATE_ELECTION_MUTATION}>
         {(createElection, { data, error }) => {
           return (
             <Form 
@@ -73,19 +73,25 @@ class CreateElection extends React.Component {
                 e.preventDefault();
                 let voters = this.users.filter(user => user.included);
                 voters = voters.map(voter => voter.id);
-                createElection({variables: {title: this.title, body: this.body, choices: this.state.choices, open: this.open, voters: voters}});
+                this.props.new
+                ?
+                  createElection({variables: {title: this.title, body: this.body, choices: this.state.choices, open: this.open, voters: voters}})
+                :
+                  createElection({variables: {id: this.props.id,title: this.title, body: this.body, choices: this.state.choices, open: this.open, voters: voters}})
+                  
               }}
             >
               {error?<Alert color="danger">Create Election Fail!</Alert>:null}
               {(data && data.createElection)?<Alert color="success">Create election success! <NavLink to={`/vote/${data.createElection.id}`}>View your election now!</NavLink></Alert>:null}
+              {(data && data.updateElection)?<Alert color="success">Update election success! <NavLink to={`/vote/${data.updateElection.id}`}>View your election now!</NavLink></Alert>:null}
               <br />
               <FormGroup>
                 <Label for="electionTitle">Title</Label>
-                <Input type="text" name="name" required={true} id="electionTitle" onChange={e => {this.title = e.target.value}} />
+                <Input type="text" name="name" required={true} id="electionTitle" defaultValue={this.title} onChange={e => {this.title = e.target.value}} />
               </FormGroup><br />
               <FormGroup>
                 <Label for="electionBody">Description</Label>
-                <Input type="textarea" name="description" required={true} id="electionBody" onChange={e => {this.body = e.target.value}} />
+                <Input type="textarea" name="description" required={true} id="electionBody" defaultValue={this.body} onChange={e => {this.body = e.target.value}} />
               </FormGroup><br />
               <FormGroup>
                 <Label>Choices</Label>
@@ -96,7 +102,7 @@ class CreateElection extends React.Component {
               </FormGroup><br />
               <FormGroup check>
                 <Label check>
-                  <Input type="checkbox" onChange={e => {
+                  <Input type="checkbox" defaultChecked={this.open} onChange={e => {
                     this.open = e.target.checked;
                   }} />{' '}
                   Start this election when created
@@ -108,13 +114,16 @@ class CreateElection extends React.Component {
                   {({data, loading, error}) => {
                     if(loading || !(data.users)) return <Label>Loading...</Label>;
                     if(error) return <Alert color="danger">Loading User Error!</Alert>;
-                    if(this.users.length !== data.users.length) this.users = data.users.map(user => ({id: user.id, included: false}));
+                    if(this.users.length !== data.users.length) {
+                      if(this.props.new) this.users = data.users.map(user => ({id: user.id, included: false}));
+                      else this.users = data.users.map(user => ({id: user.id, included: this.props.voters.findIndex(voter => voter.id === user.id) !== -1}));
+                    }
                     return data.users.map((user, idx) => {
                       return (
                         <InputGroup key={user.id}>
                           <InputGroupAddon addonType="prepend">
                             <InputGroupText>
-                              <Input addon type="checkbox" onChange={e => {
+                              <Input addon type="checkbox" defaultChecked={this.users[idx].included} onChange={e => {
                                 this.users[idx].included = e.target.checked;
                               }} />
                             </InputGroupText>
@@ -128,7 +137,7 @@ class CreateElection extends React.Component {
                 
               </FormGroup><br />
               <Button type="submit" color="primary">
-                Create
+                {this.props.new?"Create":"Update"}
               </Button>
             </Form>
         )}}

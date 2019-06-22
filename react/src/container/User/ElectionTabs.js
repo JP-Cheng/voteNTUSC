@@ -19,7 +19,7 @@ const ElectionBlock = ({id, title, body, creator, open, voted, uid}) => {
         {localStorage['uid'] === creator.id && localStorage['uid'] === uid?
           (
             <React.Fragment>
-              <Link to={`/edit/${id}`}><Button color="info" disabled={voted.length === 0}>Edit</Button></Link>
+              <Link to={`/edit/${id}`}><Button color="info" disabled={voted.length !== 0}>Edit</Button></Link>
               <Button color="danger">Delete</Button>
             </React.Fragment>
           ):

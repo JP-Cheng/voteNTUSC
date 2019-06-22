@@ -20,7 +20,7 @@ import Register from '../component/navbar/Register'
 import Login from '../component/navbar/Login'
 import './App.css';
 import Navbar from '../component/navbar'
-import { View, Vote, Create } from './Election'
+import { View, Vote, Create, Edit } from './Election'
 import { AllUser, Profile } from './User'
 
 class App extends React.Component {
@@ -45,7 +45,8 @@ class App extends React.Component {
               <Route path="/vote/:id">{({match}) => <Vote electionId={match.params.id} />}</Route>
               <Route exact path="/login"><Login /></Route>
               <Route exact path="/register"><Register /></Route>
-              <Route exact path="/create"><Create /></Route>
+              <Route exact path="/create"><Create new={true} /></Route>
+              <Route path="/edit/:id">{({match}) => <Edit id={match.params.id} />}</Route>
               <Route exact path="/user"><AllUser /></Route>
               <Route path="/user/:id">{({match}) => <Profile uid={match.params.id} />}</Route>
               {/*
