@@ -4,17 +4,17 @@ const User = {
     return parent._id;
   },
   async createdElections(parent, args, { db }, info) {
-    return await db.elections.find({creator: parent.id})
+    return await db.elections.find({creator: parent._id})
     .then(_elections => _elections)
     .catch(err => {throw err})
   },
   async voteableElections(parent, args, { db }, info) {
-    return await db.elections.find({voters: parent.id})
+    return await db.elections.find({voters: parent._id})
     .then(_elections => _elections)
     .catch(err => {throw err})
   },
   async votedElections(parent, args, { db }, info) {
-    return await db.elections.find({voted: parent.id})
+    return await db.elections.find({voted: parent._id})
     .then(_elections => _elections)
     .catch(err => {throw err})
   }

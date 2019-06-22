@@ -86,11 +86,12 @@ class Vote extends React.Component {
             </div><br />
             <div className="election-info">
               共有{data.election.voters.length}人可以投票<br />
-              已有{data.election.voted.length}人投下選票<br />
+              已有{data.election.ballots.length}人投下選票<br />
               目前票數統計：<br />
               {data.election.choices.map((choice, idx) => {
                 return `${idx+1}. ${choice}: ${countVote(idx, data.election.ballots)}票 `
               })}
+              {`${data.election.choices.length+1}. 廢票: ${countVote(-1, data.election.ballots)}票`}
             </div><br />
             <VoteForm voted={data.election.voted} choices={data.election.choices} electionId={this.props.electionId} />
           </div>

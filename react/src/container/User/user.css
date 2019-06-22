@@ -1,0 +1,19 @@
+.user-block {
+  margin: 0.6em;
+  border: 3px black solid;
+  padding: 1em;
+}
+
+.user-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.user-elections {
+  margin-top: 3em;
+  width: 40em;
+}
+
+.user-election-button {
+  cursor: pointer;
+}

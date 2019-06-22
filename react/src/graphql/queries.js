@@ -19,6 +19,43 @@ const USERS_QUERY = gql`
   }
 `
 
+const USER_QUERY = gql`
+  query user($uid: ID!) {
+    user(uid: $uid) {
+      id
+      name
+      email
+      createdElections {
+        id title body open
+        creator {
+          id name
+        }
+        voted {
+          id
+        }
+      }
+      voteableElections {
+        id title body open
+        creator {
+          id name
+        }
+        voted {
+          id
+        }
+      }
+      votedElections {
+        id title body open
+        creator {
+          id name
+        }
+        voted {
+          id
+        }
+      }
+    }
+  }
+`
+
 const ELECTIONS_QUERY = gql`
   query elections($query: String) {
     elections(query: $query) {
@@ -104,4 +141,4 @@ const ME_QUERY = gql`
   }
 `
 
-export { USERS_QUERY, ELECTIONS_QUERY, ELECTION_QUERY, BALLOTS_QUERY, BALLOT_QUERY, ME_QUERY }
+export { USERS_QUERY, USER_QUERY, ELECTIONS_QUERY, ELECTION_QUERY, BALLOTS_QUERY, BALLOT_QUERY, ME_QUERY }

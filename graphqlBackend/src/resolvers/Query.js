@@ -16,6 +16,17 @@ const Query = {
     }
     return result;
   },
+  async user(parent, args, { db }, info) {
+    console.log(args.uid);
+    return await db.users.findById(args.uid)
+    .then(user => {
+      if(!user) throw new Error("QueryUser Error: uid Not Found");
+      let _user = user.toObject();
+      delete _user.pwdHash;
+      return _user;
+    })
+    .catch(err => {throw err;});
+  },
   async elections(parent, args, { db }, info) {
     const _str = new RegExp(args.query, 'i');
     console.log("Looking for Elections:", _str);

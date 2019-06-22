@@ -1,5 +1,6 @@
 type Query {
   users(query: String): [User]!
+  user(uid: ID!): User!
   elections(query: String): [Election]!
   election(electionId: ID!): Election!
   ballots(electionId: ID!): [Ballot]!

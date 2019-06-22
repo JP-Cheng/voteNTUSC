@@ -29,11 +29,12 @@ const loggedIn = () => {
             return notLoggedIn;
           }
           const name = (data&&data.me)?data.me.name:"";
+          const id = (data&&data.me)?data.me.id:"";
           if(data&&data.me) localStorage.setItem('uid', data.me.id);
           return (
             <React.Fragment>
               <NavItem className={classes.item}>
-                  Hello, <Link to="/user">{name}</Link>
+                  Hello, <Link to={`/user/${id}`}>{name}</Link>
               </NavItem>
               <NavItem className={classes.item}>
                 <Link to="/redirect" onClick={() => {
