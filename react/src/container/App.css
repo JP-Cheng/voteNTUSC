@@ -13,11 +13,16 @@
 
 .bottomBar {
   position: absolute;
-  bottom: 100px;
-  left: calc(50vw - 212px);
+  bottom: 3em;
+  left: calc(50% - 7em);
   text-align: center;
 }
 
 .App {
   text-align: center;
+}
+
+.button-link:hover a {
+  text-decoration: none;
+  color: white;
 }

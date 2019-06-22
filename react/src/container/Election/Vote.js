@@ -1,6 +1,6 @@
 import React from 'react'
 import { Query, Mutation } from 'react-apollo'
-import { ELECTION_QUERY, CREATE_BALLOT_MUTATION } from '../../graphql/index'
+import { ELECTION_QUERY, BALLOTS_SUBSCRIPTION, CREATE_BALLOT_MUTATION } from '../../graphql/index'
 import { Button, Alert } from 'reactstrap'
 
 const countVote = (id, ballots) => ballots.filter(ballot => ballot.choice === id).length;
@@ -55,9 +55,23 @@ class Vote extends React.Component {
   render() {
     return (
       <Query query={ELECTION_QUERY} variables={{electionId: this.props.electionId}}>
-      {({data}, loading, error) => {
+      {({data, loading, error, subscribeToMore}) => {
         if(loading || !(data.election)) return <h1>Loading...</h1>;
         if(error) return <h1>Error!</h1>;
+        subscribeToMore({
+          document: BALLOTS_SUBSCRIPTION,
+          variables: {electionId: data.election.id},
+          updateQuery: (prev, {subscriptionData}) => {
+            if(!(subscriptionData.data) || subscriptionData.data.ballots.mutation !== 'CREATED') return prev;
+            else {
+              if(data.election.ballots.findIndex(ballot => {
+                return ballot.id === subscriptionData.data.ballots.data.id;
+              }) !== -1) return prev;
+              prev.election.ballots.push(subscriptionData.data.ballots.data);
+              return prev;
+            }
+          }
+        })
         return (
           <div>
             <h1>{data.election.title}</h1>

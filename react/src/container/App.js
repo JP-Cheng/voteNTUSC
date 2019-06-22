@@ -1,5 +1,6 @@
-import React from 'react';
-import { BrowserRouter, Route, NavLink, Switch, Redirect } from 'react-router-dom'
+import React from 'react'
+import { BrowserRouter, Route, Link, Switch, Redirect } from 'react-router-dom'
+import { Button, ButtonGroup } from 'reactstrap'
 import ChooseQues from './Pages/ChooseQues'
 import ResultChart from './Pages/ResultChart'
 
@@ -7,16 +8,16 @@ import ResultChart from './Pages/ResultChart'
 //import MainPage from './Pages/MainPage'
 //import QuesPage from './Pages/QuesPage'
 //import Dashboard from './Pages/Dashboard'
+//import Option from '../component/Option/Option'
+//import vote from '../component/Option/vote.png'
+//import result from '../component/Option/result.png'
+//import hist from '../component/Option/hist.png'
+//import logout from '../component/Option/logout.png'
 
 import afterPage from '../component/afterVote'
 import TopImg from '../component/TopImg/TopImg'
-import Option from '../component/Option/Option'
-import vote from '../component/Option/vote.png'
-import result from '../component/Option/result.png'
-import hist from '../component/Option/hist.png'
 import Register from '../component/navbar/Register'
 import Login from '../component/navbar/Login'
-import logout from '../component/Option/logout.png'
 import './App.css';
 import Navbar from '../component/navbar'
 import { View, Vote, Create } from './Election'
@@ -61,11 +62,15 @@ class App extends React.Component {
                   return <Redirect to={"/"+match.params.name} />;
                 }}
               </Route>
+              <Route path="/redirect">{() => {
+                this.forceUpdate();
+                return <Redirect to="/" />;
+              }}</Route>
             </Switch>
           </div>
 
           <div className="bottomBar" >
-
+            {/*
             <NavLink activeClassName="selected" to="/vote">
               <Option src={vote} scale={100} />
             </NavLink>
@@ -81,6 +86,12 @@ class App extends React.Component {
             <NavLink activeClassName="selected" to="/">
               <Option src={logout} scale={100} />
             </NavLink>
+            */}
+            <ButtonGroup>
+              {/* ToBeFix: click on button margin won't trigger link */}
+              <Button className="button-link" outline color="info"><Link to="/vote">Elections</Link></Button>
+              <Button className="button-link" outline color="info"><Link to="/create">Create Election</Link></Button>
+            </ButtonGroup>
 
           </div>
         </BrowserRouter>

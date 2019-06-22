@@ -108,7 +108,7 @@ class CreateElection extends React.Component {
                   {({data, loading, error}) => {
                     if(loading || !(data.users)) return <Label>Loading...</Label>;
                     if(error) return <Alert color="danger">Loading User Error!</Alert>;
-                    this.users = data.users.map(user => ({id: user.id, included: false}));
+                    if(this.users.length !== data.users.length) this.users = data.users.map(user => ({id: user.id, included: false}));
                     return data.users.map((user, idx) => {
                       return (
                         <InputGroup key={user.id}>

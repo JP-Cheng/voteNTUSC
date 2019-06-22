@@ -10,13 +10,18 @@ export const ELECTION_SUBSCRIPTION = gql`
         title
         body
         open
+        choices
         creator {
-          id
-          name
+          id name
+        }
+        ballots {
+          id choice
         }
         voters {
-          id
-          name
+          id name
+        }
+        voted {
+          id name
         }
       }
     }
@@ -29,7 +34,6 @@ export const BALLOTS_SUBSCRIPTION = gql`
       mutation
       data {
         id
-        election
         choice
       }
     }
