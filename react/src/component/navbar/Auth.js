@@ -8,6 +8,8 @@ import {
 } from 'reactstrap'
 import classes from './Auth.module.css'
 
+let _refetch = null;
+
 const notLoggedIn = (
   <Nav className="ml-auto" navbar>
     <NavItem className={classes.item}>
@@ -20,10 +22,12 @@ const notLoggedIn = (
 );
 
 const loggedIn = () => {
+  if(_refetch) _refetch();
   return (
     <Nav className="ml-auto" navbar>
       <Query query={ME_QUERY}>
-        {({data, error}) => {
+        {({data, error, refetch}) => {
+          _refetch = refetch;
           if(error) {
             console.error(error);
             return notLoggedIn;
@@ -38,8 +42,8 @@ const loggedIn = () => {
               </NavItem>
               <NavItem className={classes.item}>
                 <Link to="/redirect" onClick={() => {
-                    console.log("Logged out");
-                    localStorage.setItem('token', '');              
+                    localStorage.setItem('token', '');
+                    localStorage.setItem('uid', '');
                 }}>
                   Logout
                 </Link>

@@ -131,7 +131,7 @@ const Mutation = {
     if (typeof title === 'string') {
       await db.elections.findOne({title: title})
       .then(_election => {
-        if(_election && _election._id !== id) throw new Error("UpdateElection Error: Title Already Exist")
+        if(_election && _election._id.toString() !== id) throw new Error("UpdateElection Error: Title Already Exist")
       })
       .catch(err => {throw err});
 
@@ -193,6 +193,13 @@ const Mutation = {
       ballots: {
         mutation: 'CREATED',
         data: newBallot.toObject()
+      }
+    })
+    pubsub.publish('election', {
+      elections: {
+        mutation: 'UPDATED',
+        electionId: election._id,
+        data: election.toObject()
       }
     })
 

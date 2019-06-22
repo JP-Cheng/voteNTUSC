@@ -1,6 +1,7 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
 import { TabContent, TabPane, Nav, NavItem, NavLink, Card, Button, CardTitle, CardSubtitle, CardBody, CardText } from 'reactstrap'
+import { Delete } from '../Election'
 
 const ElectionBlock = ({id, title, body, creator, open, voted, uid}) => {
   return (
@@ -20,7 +21,7 @@ const ElectionBlock = ({id, title, body, creator, open, voted, uid}) => {
           (
             <React.Fragment>
               <Link to={`/edit/${id}`}><Button color="info" disabled={voted.length !== 0}>Edit</Button></Link>
-              <Button color="danger">Delete</Button>
+              <Delete electionId={id} />
             </React.Fragment>
           ):
           null
@@ -72,7 +73,7 @@ class ElectionTabs extends React.Component {
                     id={election.id}
                     key={election.id}
                     title={election.title}
-                    body={election.title}
+                    body={election.body}
                     creator={election.creator}
                     open={election.open}
                     voted={election.voted}

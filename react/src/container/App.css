@@ -14,7 +14,7 @@
 .bottomBar {
   position: absolute;
   bottom: 3em;
-  left: calc(50% - 7em);
+  left: calc(50% - 9em);
   text-align: center;
 }
 
