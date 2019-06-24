@@ -1,6 +1,7 @@
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
-import { findUser, findElection, _deleteBallot, _deleteElection } from './util'
+import { findUser, findElection, findTwoStageElection, _deleteBallot, _deleteCommitment, _deleteOpening, _deleteElection, _deleteTwoStageElection } from './util'
+import { myHash } from '../lib'
 
 require('dotenv').config();
 
@@ -164,6 +165,74 @@ const Mutation = {
     })
     return election.toObject();
   },
+  async createTwoStageElection(parent, args, { me, db, pubsub, req }, info) {
+    console.log("Creating Election...")
+    if(!me) throw new Error("CreateTwoStageElection Error: Not Login");
+    if(args.data.voters.length === 0) throw new Error("CreateTwoStageElection Error: No Voters");
+    if(args.data.state === "OPEN") throw new Error("CreateTwoStageElection Error: Invalid State");
+    
+    await db.twoStageElections.findOne({title: args.data.title})
+    .then(_election => {
+      if(_election) throw new Error("CreateTwoStageElection Error: Title Already Exist");
+    })
+    .catch(err => {throw err});
+
+    const creator = await findUser(db, me._id);
+    const newElection = db.twoStageElections({ ...args.data, creator: creator._id, voted: [] });
+    
+    let election = await newElection.save().then(_ => {
+      console.log("TwoStageElection created", newElection.toObject());
+      return newElection.toObject(); 
+    })
+    .catch(err => {throw err;});
+
+    election.creator = creator.toObject();
+    
+    pubsub.publish('twoStageElection', {
+      twoStageElections: {
+        mutation: 'CREATED',
+        electionId: election._id,
+        data: election
+      }
+    })
+    
+    return election;
+  },
+  async deleteTwoStageElection(parent, args, { me, db, pubsub }, info) {
+    if(!me) throw new Error("DeleteTwoStageElection Error: Not Login")
+    return await db.twoStageElections.findById(args.id)
+    .then(found => {
+      if(!found) throw new Error("DeleteTwoStageElection Error: Election Not Found");
+      if(me._id !== found.creator.toString()) throw new Error("DeleteTwoStageElection Error: Not Creator")
+      return _deleteTwoStageElection(args.id, db, pubsub);
+    })
+    .catch(err => {throw err});
+  },
+  async updateTwoStageElection(parent, args, { me, db, pubsub }, info) {
+    const { id, state: newState } = args;
+    let election = await findTwoStageElection(db, id);
+    let state = election.state;
+    if(!me) throw new Error("UpdateTwoStageElection Error: Not Login");
+    if(election.creator.toString() !== me._id) throw new Error("UpdateTwoStageElection Error: Not Creator");
+    if(newState !== "CLOSE" && newState !== "COMMIT" && newState !== "OPEN") throw new Error("UpdateTwoStageElection Error: Invalid State");
+    if(election.voted.length !== 0 && state === "CLOSE") throw new Error("UpdateTwoStageElection Error: Election Already Ended");
+    if((state === "CLOSE" && newState !== "COMMIT") || (state === "COMMIT" && newState !== "OPEN") || (state === "OPEN" && newState !== "CLOSE")) {
+      throw new Error("UpdateTwoStageElection Error: Invalid Operation");
+    }
+
+    election.state = newState;
+    await election.save();
+    
+    pubsub.publish('twoStageElection', {
+      elections: {
+        mutation: 'UPDATED',
+        electionId: election._id,
+        data: election.toObject()
+      }
+    })
+    
+    return election.toObject();
+  },
   async createBallot(parent, args, { me, db, pubsub, req }, info) {
     if(!me) throw new Error("Create Ballot Error: Not Login");
     await findUser(db, me._id);
@@ -204,6 +273,106 @@ const Mutation = {
     })
 
     return newBallot.toObject();
+  },
+  async createCommitment(parent, args, { me, db, pubsub, req }, info) {
+    if(!me) throw new Error("Create Commitment Error: Not Login");
+    await findUser(db, me._id);
+
+    const { twoStageElectionId, commitment } = args.data;
+    const election = await findTwoStageElection(db, twoStageElectionId);
+
+    if (election.state !== "COMMIT") {
+      throw new Error('CreateCommitment Error: Not In Commit State');
+    }
+    if(election.voters.findIndex(_voters => _voters.toString() === me._id) === -1) {
+      throw new Error('CreateCommitment Error: User Not In Voters');
+    }
+    if(election.voted.findIndex(_Voted => _Voted.toString() === me._id) !== -1) {
+      throw new Error('CreateCommitment Error: User Already Committed');
+    }
+    await db.commitments.find({election: twoStageElectionId, commitment: commitment})
+    .then(_commitment => {
+      if(_commitment.length > 0) throw new Error("CreateCommitment Error: Same Commitment");
+    })
+    .catch(err => {throw err});
+
+    const newCommitment = db.commitments({election: election._id, commitment: commitment});
+    await newCommitment.save()
+    .catch(err => {throw err});
+    
+    election.voted.push(me._id);
+    election.markModified('voted');
+    await election.save()
+    .catch(err => {throw err});
+    
+    pubsub.publish(`commitment ${election._id}`, {
+      commitments: {
+        mutation: 'CREATED',
+        data: newCommitment.toObject()
+      }
+    })
+    pubsub.publish('election', {
+      elections: {
+        mutation: 'UPDATED',
+        electionId: election._id,
+        data: election.toObject()
+      }
+    })
+
+    return newCommitment.toObject();
+  },
+  async createOpening(parent, args, { me, db, pubsub, req }, info) {
+    if(me) throw new Error("Create Opening Error: Not Logout");
+
+    const { twoStageElectionId, hashedSecret, choice } = args.data;
+    const election = await findTwoStageElection(db, twoStageElectionId);
+
+    if (election.state !== "OPEN") {
+      throw new Error('CreateOpening Error: Election Not In Open State');
+    }
+
+    const hashedChoice = myHash(choice.toString());
+    const commitment = myHash(`${hashedSecret}${hashedChoice}`);
+    if(!hashedChoice || !commitment) throw new Error("CreateOpening Error: Empty Hash Value");
+    await db.openings.find({election: election._id, hashedChoice: hashedChoice, hashedSecret: hashedSecret})
+    .then(found => {
+      if(found.length > 0) throw new Error("CreateOpening Error: Same Opening Found");
+    })
+    .catch(err => {throw err});
+    await db.commitments.find({election: election._id, commitment: commitment})
+    .then(found => {
+      if(found.length === 0) throw new Error("CreateOpening Error: No Matching Commitment");
+    })
+    .catch(err => {throw err});
+
+    const newOpening = db.openings({election: election._id, hashedChoice: hashedChoice, hashedSecret: hashedSecret});
+    await newOpening.save()
+    .catch(err => {throw err});
+    const newBallot = db.ballots({election: election._id, choice: choice});
+    await newBallot.save()
+    .catch(err => {throw err});
+
+    pubsub.publish(`opening ${election._id}`, {
+      openings: {
+        mutation: 'CREATED',
+        data: newOpening.toObject()
+      }
+    })
+    pubsub.publish(`ballot ${election._id}`, {
+      openings: {
+        mutation: 'CREATED',
+        data: newBallot.toObject()
+      }
+    })
+    pubsub.publish('election', {
+      elections: {
+        mutation: 'UPDATED',
+        electionId: election._id,
+        data: election.toObject()
+      }
+    })
+
+    return newOpening.toObject();
   },
   async login(parent, args, { db, pubsub, req}, info) {
     const user = await db.users.findOne({email: args.email})

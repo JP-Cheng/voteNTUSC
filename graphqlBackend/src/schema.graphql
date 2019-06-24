@@ -3,10 +3,15 @@ type Query {
   user(uid: ID!): User!
   elections(query: String): [Election]!
   election(electionId: ID!): Election!
+  twoStageElections(query: String): [TwoStageElection]!
+  twoStageElection(query: ID!): TwoStageElection!
   ballots(electionId: ID!): [Ballot]!
   ballot(ballotId: ID!):  Ballot
+  commitments(electionId: ID!): [Commitment]!
+  commitment(commitmentId: ID!): Commitment
+  openings(electionId: ID!): [Opening]!
+  opening(openingId: ID!): Opening
   me: User!
-  
 }
 
 type Mutation {
@@ -16,13 +21,21 @@ type Mutation {
   createElection(data: CreateElectionInput!): Election!
   deleteElection(id: ID!): ID!
   updateElection(id: ID!, data: UpdateElectionInput!): Election!
+  createTwoStageElection(data: CreateTwoStageElectionInput!): TwoStageElection!
+  deleteTwoStageElection(id: ID!): ID!
+  updateTwoStageElection(id: ID!, state: String!): TwoStageElection!
   createBallot(data: CreateBallotInput!): Ballot!
+  createCommitment(data: CreateCommitmentInput!): Commitment!
+  createOpening(data: CreateOpeningInput!): Opening!
   login(email: String!, pwd: String!): Token!
 }
 
 type Subscription {
   ballots(electionId: ID!): BallotsSubscriptionPayload!
+  commitments(electionId: ID!): CommitmentsSubscriptionPayload!
+  openings(electionId: ID!): OpeningsSubscriptionPayload!
   elections: ElectionsSubscriptionPayload!
+  twoStageElections: TwoStageElectionsSubscriptionPayload!
 }
 
 
@@ -42,8 +55,27 @@ input UpdateElectionInput {
   voters: [ID!]
 }
 
+input CreateTwoStageElectionInput {
+  title: String!
+  body: String!
+  choices: [String!]!
+  state: String!
+  voters: [ID!]!
+}
+
 input CreateBallotInput {
   electionId: ID!
+  choice: Int!
+}
+
+input CreateCommitmentInput {
+  twoStageElectionId: ID!
+  commitment: String!
+}
+
+input CreateOpeningInput {
+  twoStageElectionId: ID!
+  hashedSecret: String!
   choice: Int!
 }
 
@@ -54,6 +86,9 @@ type User {
   createdElections: [Election]!
   voteableElections: [Election]!
   votedElections: [Election]!
+  createdTwoStageElections: [TwoStageElection]!
+  voteableTwoStageElections: [TwoStageElection]!
+  votedTwoStageElections: [TwoStageElection]!
 }
 
 type Election {
@@ -68,10 +103,37 @@ type Election {
   voted: [User]!
 }
 
+type TwoStageElection {
+  id: ID!
+  title: String!
+  body: String!
+  choices: [String!]!
+  creator: User!
+  state: String!
+  commitments: [Commitment]!
+  openings: [Opening]!
+  ballots: [Ballot]!
+  voters: [User!]!
+  voted: [User]!
+}
+
 type Ballot {
   id: ID!
   election: Election!
   choice: Int!
+}
+
+type Commitment {
+  id: ID!
+  election: TwoStageElection!
+  commitment: String!
+}
+
+type Opening {
+  id: ID!
+  election: TwoStageElection!
+  hashedChoice: String!
+  hashedSecret: String!
 }
 
 type Token {
@@ -88,6 +150,22 @@ type ElectionsSubscriptionPayload {
   mutation: MutationType!
   electionId: ID!
   data: Election
+}
+
+type TwoStageElectionsSubscriptionPayload {
+  mutation: MutationType!
+  electionId: ID!
+  data: TwoStageElection
+}
+
+type CommitmentsSubscriptionPayload {
+  mutation: MutationType!
+  data: Commitment!
+}
+
+type OpeningsSubscriptionPayload {
+  mutation: MutationType!
+  data: Opening!
 }
 
 type BallotsSubscriptionPayload {

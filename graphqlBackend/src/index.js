@@ -7,7 +7,10 @@ import Mutation from './resolvers/Mutation'
 import Subscription from './resolvers/Subscription'
 import User from './resolvers/User'
 import Election from './resolvers/Election'
+import TwoStageElection from './resolvers/TwoStageElection'
 import Ballot from './resolvers/Ballot'
+import Commitment from './resolvers/Commitment'
+import Opening from './resolvers/Opening'
 
 const pubsub = new PubSub()
 require('dotenv').config();
@@ -20,7 +23,10 @@ const server = new GraphQLServer({
     Subscription,
     User,
     Election,
-    Ballot
+    TwoStageElection,
+    Ballot,
+    Commitment,
+    Opening
   },
   context: async req => {
     let token = null;

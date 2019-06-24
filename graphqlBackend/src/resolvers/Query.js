@@ -48,6 +48,26 @@ const Query = {
     .then(doc => {return doc;})
     .catch(err => {throw err});
   },
+  async twoStageElections(parent, args, { db }, info) {
+    const _str = new RegExp(args.query, 'i');
+    console.log("Looking for TwoStageElections:", _str);
+    if (!args.query) {
+      // return all elections
+      return await db.twoStageElections.find({})
+      .then(docs => {return docs;})
+      .catch(err => {throw err});
+    }
+    // Exec case insensitive LIKE query
+    return await db.twoStageElections.find({ $or: [{title: _str}, {body: _str}]})
+    .then(docs => {return docs;})
+    .catch(err => {throw err});
+  },
+  async twoStageElection(parent, args, { db }, info) {
+    // Exec case insensitive LIKE query
+    return await db.twoStageElections.findById(args.query)
+    .then(doc => doc)
+    .catch(err => {throw err});
+  },
   async ballots(parent, args, { db }, info) {
     return await db.ballots.find({election: args.electionId})
     .then(docs => docs)
@@ -55,6 +75,26 @@ const Query = {
   },
   async ballot(parent, args, { db }, info) {
     return await db.ballots.findById(args.ballotId)
+    .then(doc => doc)
+    .catch(err => {throw err});
+  },
+  async commitments(parent, args, { db }, info) {
+    return await db.commitments.find({election: args.electionId})
+    .then(docs => docs)
+    .catch(err => {throw err});
+  },
+  async commitment(parent, args, { db }, info) {
+    return await db.commitments.findById(args.commitmentId)
+    .then(doc => doc)
+    .catch(err => {throw err});
+  },
+  async openings(parent, args, { db }, info) {
+    return await db.openings.find({election: args.electionId})
+    .then(docs => docs)
+    .catch(err => {throw err});
+  },
+  async opening(parent, args, { db }, info) {
+    return await db.openings.findById(args.openingId)
     .then(doc => doc)
     .catch(err => {throw err});
   },

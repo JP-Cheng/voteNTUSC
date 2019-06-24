@@ -1,6 +1,9 @@
 const mongoose = require('mongoose');
 const ballots = require("./models/ballots");
+const commitments = require("./models/commitment");
+const openings = require("./models/opening");
 const elections = require("./models/elections");
+const twoStageElections = require("./models/twoStageElection");
 const users = require("./models/users");
 require('dotenv').config();
 
@@ -25,7 +28,10 @@ mongoose.connection.on('connected', function () {
 const db = {
   users,
   ballots,
-  elections
+  commitments,
+  openings,
+  elections,
+  twoStageElections
 }
 
 export { db as default }

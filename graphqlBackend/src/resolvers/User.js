@@ -17,6 +17,21 @@ const User = {
     return await db.elections.find({voted: parent._id})
     .then(_elections => _elections)
     .catch(err => {throw err})
+  },
+  async createdTwoStageElections(parent, args, { db }, info) {
+    return await db.twoStageElections.find({creator: parent._id})
+    .then(_elections => _elections)
+    .catch(err => {throw err})
+  },
+  async voteableTwoStageElections(parent, args, { db }, info) {
+    return await db.twoStageElections.find({voters: parent._id})
+    .then(_elections => _elections)
+    .catch(err => {throw err})
+  },
+  async votedTwoStageElections(parent, args, { db }, info) {
+    return await db.twoStageElections.find({voted: parent._id})
+    .then(_elections => _elections)
+    .catch(err => {throw err})
   }
 }
 
