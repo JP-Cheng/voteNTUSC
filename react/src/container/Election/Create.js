@@ -32,15 +32,15 @@ const Choices = props => {
 class CreateElection extends React.Component {
   constructor(props) {
     super(props);
-    this.title = props.new?null:props.title;
-    this.body  = props.new?null:props.body;
-    this.open  = props.new?false:props.open;
+    this.title = props.new ? null : props.title;
+    this.body = props.new ? null : props.body;
+    this.open = props.new ? false : props.open;
     this.users = [];
     this.state = {
-      choices: props.new?[""]:props.choices
+      choices: props.new ? [""] : props.choices
     };
   }
-  
+
   handleChoiceInput = e => {
     const id = e.target.id, value = e.target.value;
     this.setState(state => {
@@ -56,42 +56,44 @@ class CreateElection extends React.Component {
   }
   removeChoice = e => {
     const idx = parseInt(e.target.id.substring(7));
-    if(this.state.choices.length === 1) return;
+    if (this.state.choices.length === 1) return;
     this.setState(state => {
       state.choices.splice(idx, 1);
       return state;
     })
   }
 
-  render () {
+  render() {
     return (
-      <Mutation mutation={this.props.new?CREATE_ELECTION_MUTATION:UPDATE_ELECTION_MUTATION}>
+      <Mutation
+        mutation={this.props.new ? CREATE_ELECTION_MUTATION : UPDATE_ELECTION_MUTATION}>
         {(createElection, { data, error }) => {
           return (
-            <Form 
+            <Form
+
               onSubmit={e => {
                 e.preventDefault();
                 let voters = this.users.filter(user => user.included);
                 voters = voters.map(voter => voter.id);
                 this.props.new
-                ?
-                  createElection({variables: {title: this.title, body: this.body, choices: this.state.choices, open: this.open, voters: voters}})
-                :
-                  createElection({variables: {id: this.props.id,title: this.title, body: this.body, choices: this.state.choices, open: this.open, voters: voters}})
-                  
+                  ?
+                  createElection({ variables: { title: this.title, body: this.body, choices: this.state.choices, open: this.open, voters: voters } })
+                  :
+                  createElection({ variables: { id: this.props.id, title: this.title, body: this.body, choices: this.state.choices, open: this.open, voters: voters } })
+
               }}
             >
-              {error?<Alert color="danger">Create Election Fail!</Alert>:null}
-              {(data && data.createElection)?<Alert color="success">Create election success! <NavLink to={`/vote/${data.createElection.id}`}>View your election now!</NavLink></Alert>:null}
-              {(data && data.updateElection)?<Alert color="success">Update election success! <NavLink to={`/vote/${data.updateElection.id}`}>View your election now!</NavLink></Alert>:null}
+              {error ? <Alert color="danger">Create Election Fail!</Alert> : null}
+              {(data && data.createElection) ? <Alert color="success">Create election success! <NavLink to={`/vote/${data.createElection.id}`}>View your election now!</NavLink></Alert> : null}
+              {(data && data.updateElection) ? <Alert color="success">Update election success! <NavLink to={`/vote/${data.updateElection.id}`}>View your election now!</NavLink></Alert> : null}
               <br />
               <FormGroup>
                 <Label for="electionTitle">Title</Label>
-                <Input type="text" name="name" required={true} id="electionTitle" defaultValue={this.title} onChange={e => {this.title = e.target.value}} />
+                <Input type="text" name="name" required={true} id="electionTitle" defaultValue={this.title} onChange={e => { this.title = e.target.value }} />
               </FormGroup><br />
               <FormGroup>
                 <Label for="electionBody">Description</Label>
-                <Input type="textarea" name="description" required={true} id="electionBody" defaultValue={this.body} onChange={e => {this.body = e.target.value}} />
+                <Input type="textarea" name="description" required={true} id="electionBody" defaultValue={this.body} onChange={e => { this.body = e.target.value }} />
               </FormGroup><br />
               <FormGroup>
                 <Label>Choices</Label>
@@ -111,12 +113,12 @@ class CreateElection extends React.Component {
               <FormGroup>
                 <Label>Choose Voters</Label>
                 <Query query={USERS_QUERY}>
-                  {({data, loading, error}) => {
-                    if(loading || !(data.users)) return <Label>Loading...</Label>;
-                    if(error) return <Alert color="danger">Loading User Error!</Alert>;
-                    if(this.users.length !== data.users.length) {
-                      if(this.props.new) this.users = data.users.map(user => ({id: user.id, included: false}));
-                      else this.users = data.users.map(user => ({id: user.id, included: this.props.voters.findIndex(voter => voter.id === user.id) !== -1}));
+                  {({ data, loading, error }) => {
+                    if (loading || !(data.users)) return <Label>Loading...</Label>;
+                    if (error) return <Alert color="danger">Loading User Error!</Alert>;
+                    if (this.users.length !== data.users.length) {
+                      if (this.props.new) this.users = data.users.map(user => ({ id: user.id, included: false }));
+                      else this.users = data.users.map(user => ({ id: user.id, included: this.props.voters.findIndex(voter => voter.id === user.id) !== -1 }));
                     }
                     return data.users.map((user, idx) => {
                       return (
@@ -134,13 +136,14 @@ class CreateElection extends React.Component {
                     })
                   }}
                 </Query>
-                
+
               </FormGroup><br />
               <Button type="submit" color="primary">
-                {this.props.new?"Create":"Update"}
+                {this.props.new ? "Create" : "Update"}
               </Button>
             </Form>
-        )}}
+          )
+        }}
       </Mutation>
     )
   }

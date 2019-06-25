@@ -33,7 +33,7 @@ class App extends React.Component {
   render() {
     return (
       <div className="App" id="App">
-        
+
         <BrowserRouter basename="">
           <Navbar className="top" />
 
@@ -41,22 +41,22 @@ class App extends React.Component {
             <Switch>
               <Route exact path="/" component={TopImg}></Route>
               <Route exact path="/vote"><View /></Route>
-              <Route path="/vote/:id">{({match}) => <Vote electionId={match.params.id} />}</Route>
+              <Route path="/vote/:id">{({ match }) => <Vote electionId={match.params.id} />}</Route>
               <Route exact path="/login"><Login /></Route>
               <Route exact path="/register"><Register /></Route>
               <Route exact path="/create"><Create new={true} /></Route>
-              <Route path="/edit/:id">{({match}) => <Edit id={match.params.id} />}</Route>
+              <Route path="/edit/:id">{({ match }) => <Edit id={match.params.id} />}</Route>
               <Route exact path="/user"><AllUser /></Route>
-              <Route path="/user/:id">{({match}) => <Profile uid={match.params.id} />}</Route>
+              <Route path="/user/:id">{({ match }) => <Profile uid={match.params.id} />}</Route>
               {/*
               <Route path="/vote/afterPage" component={afterPage}></Route>
               <Route path="/hist" component={ChooseQues}></Route>
               <Route path="/result" render={() => (<ResultChart text={"some text"} />)}></Route>
                */}
               <Route path="/redirect/:name">
-                {({match}) => {
+                {({ match }) => {
                   this.forceUpdate();
-                  return <Redirect to={"/"+match.params.name} />;
+                  return <Redirect to={"/" + match.params.name} />;
                 }}
               </Route>
               <Route path="/redirect">{() => {

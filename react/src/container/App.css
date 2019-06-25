@@ -2,20 +2,30 @@
   position: absolute;
   top: 0%;
   left: 0%;
-  height: 3em;
+  height: 10vh;
   width: 100%;
   margin-bottom: 3em;
 }
 
+.top{
+  height: 8vh;
+}
+
 .main {
   margin-top: 3em;
+  height: 75vh;
+  padding: 1.5em;
+  text-align: center;
+  overflow-y: scroll;
 }
 
 .bottomBar {
   position: absolute;
+  margin: 10pt;
   bottom: 3em;
   left: calc(50% - 9em);
   text-align: center;
+  height: 5vh;
 }
 
 .App {
