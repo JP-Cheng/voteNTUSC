@@ -49,7 +49,7 @@ class VoteForm extends React.Component {
           return (
             <div className="election-ballot">
               投下神聖的一票：<br />
-              {`${commit?"設定":""}密碼: `}<input type="text" placeholder={this.state.msg} onChange={this.handleSecret} />
+              {`${commit?"設定":""}密碼: `}<input type="text" placeholder={this.state.msg} onChange={this.handleSecret} /><br />
               {this.props.choices.map((choice, idx) => {
                 return (<>
                   <Button className="aChoice" color="info" id={idx} key={idx} onClick={this.handleVote}>{idx + 1}. {choice}</Button>
@@ -70,13 +70,29 @@ class twoStageVote extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      toggled: false
+      toggled: false,
+      commitmentToggled: false,
+      openingsToggled: false
     }
   }
 
   toggle = _ => {
     this.setState(state => {
       state.toggled = !state.toggled;
+      return state;
+    })
+  }
+
+  commitmentToggle = _ => {
+    this.setState(state => {
+      state.commitmentToggled = !state.commitmentToggled;
+      return state;
+    })
+  }
+
+  openingToggle = _ => {
+    this.setState(state => {
+      state.openingToggled = !state.openingToggled;
       return state;
     })
   }
@@ -169,8 +185,36 @@ class twoStageVote extends React.Component {
                   ?
                   <VoteForm stage={election.state} choices={election.choices} electionId={this.props.electionId} />
                   :
-                  <Button color="primary" disabled={!votable} onClick={this.toggle}>{text}</Button>
+                  null
                 }
+                <br />
+                <Button color="primary" disabled={!votable} onClick={this.toggle}>{this.state.toggled?"返回":text}</Button>
+                {
+                  this.state.commitmentToggled
+                  ?
+                  <div>
+                    {election.commitments.map((_commitment, idx) => {
+                      return <span key={_commitment.id}>{idx+1}. {_commitment.commitment} </span>;
+                    })}
+                  </div>
+                  :
+                  null
+                }
+                <br />
+                <Button color="info" disabled={election.state === "CLOSE"} onClick={this.commitmentToggle}>{this.state.commitmentToggled?"關閉":"查看選票"}</Button>
+                {
+                  this.state.openingToggled
+                  ?
+                  <div>
+                    {election.openings.map((_opening, idx) => {
+                      return <span key={_opening.id}>{idx}. {_opening.hashedSecret}, {_opening.hashedChoice} </span>;
+                    })}
+                  </div>
+                  :
+                  null
+                }
+                <br />
+                <Button color="success" disabled={election.state === "CLOSE" || election.state=== "COMMIT"} onClick={this.openingToggle}>{this.state.openingToggled?"關閉":"查看開票證明"}</Button>
               </div>
             </div>
           )

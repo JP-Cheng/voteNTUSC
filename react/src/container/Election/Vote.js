@@ -134,8 +134,10 @@ class Vote extends React.Component {
                   ?
                   <VoteForm voted={data.election.voted} choices={data.election.choices} electionId={this.props.electionId} />                  
                   :
-                  <Button color="primary" disabled={!votable} onClick={this.toggle}>{text}</Button>
+                  null
                 }
+                <br />
+                <Button color="primary" disabled={!votable} onClick={this.toggle}>{this.state.toggled? "返回" : text}</Button>
               </div>
             </div>
           )
