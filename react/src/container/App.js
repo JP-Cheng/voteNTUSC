@@ -1,6 +1,7 @@
 import React from 'react'
 import { BrowserRouter, Route, Link, Switch, Redirect } from 'react-router-dom'
 import { Button, ButtonGroup } from 'reactstrap'
+import styled from 'styled-components'
 
 //import ChooseQues from './Pages/ChooseQues'
 //import ResultChart from './Pages/ResultChart'
@@ -22,6 +23,11 @@ import './App.css';
 import Navbar from '../component/navbar'
 import { View, Vote, Create, Edit } from './Election'
 import { AllUser, Profile } from './User'
+
+const Div = styled.div`
+  height: 100%;
+  width: 100%;
+`;
 
 class App extends React.Component {
 
@@ -65,7 +71,7 @@ class App extends React.Component {
               }}</Route>
             </Switch>
           </div>
-
+          <br />
           <div className="bottomBar" >
             {/*
             <NavLink activeClassName="selected" to="/vote">
@@ -85,10 +91,10 @@ class App extends React.Component {
             </NavLink>
             */}
             <ButtonGroup>
-              {/* ToBeFix: click on button margin won't trigger link */}
-              <Button className="button-link" outline color="info"><Link to="/vote">Elections</Link></Button>
-              <Button className="button-link" outline color="info"><Link to="/create">Create Election</Link></Button>
-              <Button className="button-link" outline color="info"><Link to="/user">Users</Link></Button>
+              {/* ToBeFix: clicking on button margin won't trigger link */}
+              <Button className="button-link" outline color="info"><Link to="/vote"><Div>Elections</Div></Link></Button>
+              <Button className="button-link" outline color="info"><Link to="/create"><Div>Create Election</Div></Link></Button>
+              <Button className="button-link" outline color="info"><Link to="/user"><Div>Users</Div></Link></Button>
             </ButtonGroup>
 
           </div>

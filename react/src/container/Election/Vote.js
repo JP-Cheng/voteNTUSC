@@ -79,7 +79,7 @@ class Vote extends React.Component {
           return (
             <div className="election-card">
               <div className="election-title">
-                <h2>{data.election.title}</h2>
+                <h3>{data.election.title}</h3>
                 <div className="election-description">
                   {data.election.body}
                 </div>
@@ -98,7 +98,7 @@ class Vote extends React.Component {
                   <div className="aChoice">{`${data.election.choices.length + 1}. 廢票 (${countVote(-1, data.election.ballots)})`}</div>
                 </div><br /><br />
                 <div className="election-info">
-                  已有{data.election.ballots.length}/{data.election.voters.length}人投下選票<br /><br />
+                  已有<em>{data.election.ballots.length}/{data.election.voters.length}</em>人投下選票<br /><br />
                   {/* 目前票數統計：<br />
                 {data.election.choices.map((choice, idx) => {
                   return `${idx + 1}. ${choice}: ${countVote(idx, data.election.ballots)}票 `

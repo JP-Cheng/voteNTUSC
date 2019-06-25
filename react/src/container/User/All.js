@@ -1,6 +1,9 @@
 import React from 'react'
 import { Query } from 'react-apollo'
-import { Alert } from 'reactstrap'
+import {
+  Alert, Card, CardGroup, CardText, CardBody,
+  CardTitle
+} from 'reactstrap'
 import { NavLink } from 'react-router-dom'
 import { USERS_QUERY } from '../../graphql'
 import './user.css'
@@ -8,19 +11,30 @@ import './user.css'
 const AllUser = () => {
   return (
     <div className="user-list">
-      <h1>All Users</h1>
+      <h2 className="user-list-title">All Users</h2>
       <Query query={USERS_QUERY}>
-        {({data, loading, error}) => {
-          if(loading || !(data.users)) return <h1>Loading...</h1>;
-          if(error) return <Alert color="danger">Loading User Error!</Alert>;
-          return data.users.map((user, idx) => {
-            return (
-              <div className="user-block" key={user.id}>
-                <span>{`${idx+1}. `}<NavLink to={`/user/${user.id}`}>{`${user.name}`}</NavLink></span>
-                <span>{` ${user.email}`}</span>
-              </div>
-            )
-          })
+        {({ data, loading, error }) => {
+          if (loading || !(data.users)) return <h1>Loading...</h1>;
+          if (error) return <Alert color="danger">Loading User Error!</Alert>;
+          return (
+            <CardGroup>
+              {data.users.map((user, idx) => {
+                return (
+                  <NavLink to={`/user/${user.id}`}>
+                    <Card className="user-card">
+                      <CardTitle style={{ fontSize: '18pt', padding: '0.5em', margin: '0pt' }}>
+                        {user.name}
+                      </CardTitle>
+
+                    </Card>
+                  </NavLink>
+                  // <div className="user-block" key={user.id}>
+                  //   <span>{`${idx+1}. `}{`${user.name}`}</NavLink></span>
+                  //   <span>{` ${user.email}`}</span>
+                  // </div>
+                )
+              })}
+            </CardGroup>);
         }}
       </Query>
     </div>

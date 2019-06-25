@@ -1,3 +1,7 @@
+.all-election-title{
+    
+}
+
 .election-card{
     display: block;
     margin: 15pt;
@@ -14,7 +18,7 @@
 }
 
 .election-description{
-    font-size: 16pt;
+    font-size: 12pt;
 }
 
 .election-body{
@@ -28,7 +32,7 @@
     width: 12em;
     margin: 2pt;
     text-align: left;
-    font-size: 14pt;
+    font-size: 16pt;
 }
 .election-info{
     font-size: 10pt;

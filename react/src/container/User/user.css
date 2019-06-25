@@ -9,6 +9,26 @@
   flex-direction: column;
 }
 
+.user-list-title {
+  padding: 0.3em;
+  border-bottom: 1pt solid rgb(218, 212, 212);
+  margin: 0.4em;
+}
+
+.user-card { 
+  background: rgba(203, 245, 241, 0.3);
+  margin: 0.1em;
+  height: 5em;
+  width: 8em;
+  color: black;
+}
+
+.user-card:hover {
+  background: rgba(167, 238, 231, 0.274);
+  text-decoration: none;
+}
+
+
 .user-elections {
   margin-top: 3em;
   width: 40em;

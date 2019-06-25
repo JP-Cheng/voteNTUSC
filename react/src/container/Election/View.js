@@ -5,33 +5,31 @@ import {
   CardTitle, CardSubtitle, Button
 } from 'reactstrap'
 import { Link } from 'react-router-dom'
-import styled from 'styled-components'
 import { ELECTIONS_QUERY, ELECTION_SUBSCRIPTION } from '../../graphql/index'
-
-const styledCard = styled.div`
-  margin: pt;
-  width: 10em;
-`;
+import './Vote.css'
 
 const electionBlock = ({ id, title, body, creator, open }) => {
   return (
-    <styledCard>
-      <Card key={id} style={{ width: '20em', height: '12em', overflowY: 'scroll' }}>
-        <CardBody>
-          <CardTitle>
-            {title}
-          </CardTitle>
-          <br />
-          <CardSubtitle>
-            Creator: {creator ? creator.name : "None"}
-          </CardSubtitle>
-          <CardText>
-            Description: {(body.length > 10) ? (body.substring(0, 9) + '...') : (body)}
-          </CardText>
-          <Link to={"/vote/" + id}><Button color="success" disabled={!open}>View</Button></Link>
-        </CardBody>
-      </Card>
-    </styledCard>
+    // .css don't work here; please use inline css
+    <Card key={id} style={{
+      width: '20em', height: '14em', margin: '0.5em',
+      border: '1pt solid  rgba(218, 212, 212, 0.4)',
+      textAlign: 'left', padding: '0.2em 1em 0.2em 1em'
+    }}>
+      <CardBody>
+        <CardTitle>
+          {(title.length > 28) ? (title.substring(0, 27) + '...') : (title)}
+        </CardTitle>
+        <br />
+        <CardSubtitle>
+          Creator: {creator ? creator.name : "None"}
+        </CardSubtitle>
+        <CardText>
+          Description: {(body.length > 9) ? (body.substring(0, 8) + '...') : (body)}
+        </CardText>
+        <Link to={"/vote/" + id}><Button color="success" disabled={!open}>View</Button></Link>
+      </CardBody>
+    </Card>
   )
 }
 
@@ -79,9 +77,13 @@ class View extends React.Component {
               }
             }
           })
-          return (<CardGroup>
-            {data.elections.map(election => electionBlock(election))}
-          </CardGroup>);
+          return (
+            <>
+              <h2 className="all-elections-title">All Elections</h2>
+              <CardGroup>
+                {data.elections.map(election => electionBlock(election))}
+              </CardGroup>
+            </>);
 
         }}
       </Query>

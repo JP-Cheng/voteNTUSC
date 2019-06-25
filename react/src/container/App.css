@@ -13,7 +13,7 @@
 
 .main {
   margin-top: 3em;
-  height: 75vh;
+  height: 78vh;
   padding: 1.5em;
   text-align: center;
   overflow-y: scroll;
@@ -21,15 +21,22 @@
 
 .bottomBar {
   position: absolute;
-  margin: 10pt;
-  bottom: 3em;
-  left: calc(50% - 9em);
+  margin-top: 10pt;
+  bottom: 2.5em;
+  left: calc(50vw - 11.25em);
   text-align: center;
   height: 5vh;
 }
 
 .App {
   text-align: center;
+}
+
+.button-link {
+  padding: 0;
+  padding-top: 0.2em;
+  height: 2em;
+  width: 7.5em;
 }
 
 .button-link:hover a {
