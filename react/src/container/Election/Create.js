@@ -12,6 +12,8 @@ import {
   InputGroupText
 } from 'reactstrap'
 import { NavLink } from 'react-router-dom'
+import styled from 'styled-components'
+
 import { CREATE_ELECTION_MUTATION, UPDATE_ELECTION_MUTATION, USERS_QUERY } from '../../graphql'
 
 const Choices = props => {
@@ -87,8 +89,9 @@ class CreateElection extends React.Component {
               {(data && data.createElection) ? <Alert color="success">Create election success! <NavLink to={`/vote/${data.createElection.id}`}>View your election now!</NavLink></Alert> : null}
               {(data && data.updateElection) ? <Alert color="success">Update election success! <NavLink to={`/vote/${data.updateElection.id}`}>View your election now!</NavLink></Alert> : null}
               <br />
-              <FormGroup>
-                <Label for="electionTitle">Title</Label>
+
+              <FormGroup >
+                <Label for="electionTitle" >Title</Label>
                 <Input type="text" name="name" required={true} id="electionTitle" defaultValue={this.title} onChange={e => { this.title = e.target.value }} />
               </FormGroup><br />
               <FormGroup>
