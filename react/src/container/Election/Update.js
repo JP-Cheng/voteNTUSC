@@ -1,9 +1,9 @@
 import React from 'react';
 import { Mutation } from 'react-apollo'
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
-import { DELETE_ELECTION_MUTATION, DELETE_TWO_STAGE_ELECTION_MUTATION } from '../../graphql'
+import { UPDATE_ELECTION_MUTATION, UPDATE_TWO_STAGE_ELECTION_MUTATION } from '../../graphql'
 
-class Delete extends React.Component {
+class Update extends React.Component {
   constructor(props) {
     super(props);
     this.mutate = null;
@@ -26,19 +26,34 @@ class Delete extends React.Component {
   }
 
   render() {
+    const simple = this.props.type === "simpleElection";
     return (
-      <Mutation mutation={this.props.type === "simpleElection" ? DELETE_ELECTION_MUTATION : DELETE_TWO_STAGE_ELECTION_MUTATION} variables={{id: this.props.electionId}}>
+      <Mutation mutation={simple ? UPDATE_ELECTION_MUTATION : UPDATE_TWO_STAGE_ELECTION_MUTATION} variables={{id: this.props.electionId}}>
         {(deleteElection, {error}) => {
           this.mutate = deleteElection;
           if(error) console.error(error);
+          
+          let msg = "";
+          if(simple) {
+            if(this.props.open) {
+              msg = "close the election";
+            }
+            else msg = "open the election"
+          }
+          else {
+            if(this.props.state === "CLOSE") msg = "open the election";
+            else if(this.props.state === "COMMIT") msg = "stop election and start counting ballots";
+            else if(this.props.state === "OPEN") msg = "end the election";
+            else msg = "make no change";
+          }
 
           return (
             <div>
-              <Button color="danger" onClick={this.toggle}>Delete</Button>
+              <Button color="info" onClick={this.toggle}>{simple?(this.props.open?"Close":"Open"):"Next State"}</Button>
               <Modal isOpen={this.state.modal} toggle={this.toggle}>
                 <ModalHeader toggle={this.toggle}>Wait!</ModalHeader>
                 <ModalBody>
-                  Are you sure?
+                  This will {msg}. Are you sure?
                 </ModalBody>
                 <ModalFooter>
                   <Button color="primary" onClick={this.delete}>Yes!</Button>{' '}
@@ -53,4 +68,4 @@ class Delete extends React.Component {
   }
 }
 
-export default Delete;
+export default Update;

@@ -5,6 +5,7 @@ type Query {
   election(electionId: ID!): Election!
   twoStageElections(query: String): [TwoStageElection]!
   twoStageElection(query: ID!): TwoStageElection!
+  allElections(query: String): [generalElection]!
   ballots(electionId: ID!): [Ballot]!
   ballot(ballotId: ID!):  Ballot
   commitments(electionId: ID!): [Commitment]!
@@ -18,12 +19,13 @@ type Mutation {
   createUser(name: String!, email: String!, pwd: String!): User!
   deleteUser: User!
   updateUser(name: String, email: String, pwd: String): User!
+  createGeneralElection(data: CreateGeneralElectionInput!): generalElection!
   createElection(data: CreateElectionInput!): Election!
   deleteElection(id: ID!): ID!
-  updateElection(id: ID!, data: UpdateElectionInput!): Election!
+  updateElection(id: ID!): Election!
   createTwoStageElection(data: CreateTwoStageElectionInput!): TwoStageElection!
   deleteTwoStageElection(id: ID!): ID!
-  updateTwoStageElection(id: ID!, state: String!): TwoStageElection!
+  updateTwoStageElection(id: ID!): TwoStageElection!
   createBallot(data: CreateBallotInput!): Ballot!
   createCommitment(data: CreateCommitmentInput!): Commitment!
   createOpening(data: CreateOpeningInput!): Opening!
@@ -38,6 +40,14 @@ type Subscription {
   twoStageElections: TwoStageElectionsSubscriptionPayload!
 }
 
+input CreateGeneralElectionInput {
+  type: String!
+  title: String!
+  body: String!
+  choices: [String!]!
+  open: Boolean!
+  voters: [ID!]!
+}
 
 input CreateElectionInput {
   title: String!
@@ -83,6 +93,9 @@ type User {
   id: ID!
   name: String!
   email: String!
+  createdGeneralElections: [generalElection]!
+  votableGeneralElections: [generalElection]!
+  votedGeneralElections: [generalElection]!
   createdElections: [Election]!
   voteableElections: [Election]!
   votedElections: [Election]!
@@ -115,6 +128,12 @@ type TwoStageElection {
   ballots: [Ballot]!
   voters: [User!]!
   voted: [User]!
+}
+
+type generalElection {
+  type: String!
+  simpleElection: Election
+  twoStageElection: TwoStageElection
 }
 
 type Ballot {

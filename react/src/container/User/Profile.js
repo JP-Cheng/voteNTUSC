@@ -42,6 +42,7 @@ const Profile = (props) => {
           _refetch = refetch;
           if(loading || (data && !(data.user))) return <h1>Loading...</h1>;
           if(error) return <Alert color="danger">Loading User Profile Error!</Alert>;
+          /*
           subscribeToMore({
             document: ELECTION_SUBSCRIPTION,
             updateQuery: (prev, { subscriptionData }) => {
@@ -68,15 +69,16 @@ const Profile = (props) => {
               }
             }
           })
+          */
 
           return (
             <React.Fragment>
               <h1>{`${data.user.name}`}</h1>
               <span>{`${data.user.email}`}</span>
               <ElectionTabs 
-                createdElections={data.user.createdElections}
-                voteableElections={data.user.voteableElections}
-                votedElections={data.user.votedElections}
+                createdGeneralElections={data.user.createdGeneralElections}
+                votableGeneralElections={data.user.votableGeneralElections}
+                votedGeneralElections={data.user.votedGeneralElections}
                 uid={props.uid}
               />
             </React.Fragment>

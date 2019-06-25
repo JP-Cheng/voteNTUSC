@@ -1,9 +1,9 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
 import { TabContent, TabPane, Nav, NavItem, NavLink, Card, Button, CardTitle, CardSubtitle, CardBody, CardText } from 'reactstrap'
-import { Delete } from '../Election'
+import { Delete, Update } from '../Election'
 
-const ElectionBlock = ({id, title, body, creator, open, voted, uid}) => {
+const ElectionBlock = ({id, type, title, body, creator, open, state, uid}) => {
   return (
     <Card key={id}>
       <CardBody>
@@ -15,18 +15,19 @@ const ElectionBlock = ({id, title, body, creator, open, voted, uid}) => {
           Creator: {creator?creator.name:"None"}
         </CardSubtitle>
         <CardText>
-          Description: {body}
+          Description: {body}<br />
+          <i style={{color: 'gray'}}>{type}</i>
         </CardText>
         {localStorage['uid'] === creator.id && localStorage['uid'] === uid?
           (
             <React.Fragment>
-              <Link to={`/edit/${id}`}><Button color="info" disabled={voted.length !== 0}>Edit</Button></Link>
-              <Delete electionId={id} />
+              <Update electionId={id} type={type} open={open} state={state} />
+              <Delete electionId={id} type={type} />
             </React.Fragment>
           ):
           null
         }
-        <Link to={"/vote/"+id}><Button color="success" disabled={!open}>View</Button></Link>
+        <Link to={`/vote/${type==="simpleElection"?"simple":"twoStage"}/${id}`}><Button color="success">View</Button></Link>
       </CardBody>
     </Card>
   )
@@ -65,18 +66,20 @@ class ElectionTabs extends React.Component {
           })}
         </Nav>
         <TabContent activeTab={this.state.activeTab}>
-          {[this.props.createdElections, this.props.voteableElections, this.props.votedElections].map((elections, idx) => {
+          {[this.props.createdGeneralElections, this.props.votableGeneralElections, this.props.votedGeneralElections].map((elections, idx) => {
             return (
               <TabPane tabId={`${idx+1}`} key={`${idx+1}`}>
-                {elections.map(election => {
+                {elections.map(generalElection => {
+                  const election = generalElection.type==="simpleElection"? generalElection.simpleElection : generalElection.twoStageElection;
                   return <ElectionBlock 
                     id={election.id}
+                    type={generalElection.type}
                     key={election.id}
                     title={election.title}
                     body={election.body}
                     creator={election.creator}
                     open={election.open}
-                    voted={election.voted}
+                    state={election.state}
                     uid={this.props.uid}
                   />
                 })}

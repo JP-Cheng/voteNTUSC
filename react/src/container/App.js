@@ -3,25 +3,12 @@ import { BrowserRouter, Route, Link, Switch, Redirect } from 'react-router-dom'
 import { Button, ButtonGroup } from 'reactstrap'
 import styled from 'styled-components'
 
-//import ChooseQues from './Pages/ChooseQues'
-//import ResultChart from './Pages/ResultChart'
-//import LaunchQues from './Pages/LaunchQues'
-//import MainPage from './Pages/MainPage'
-//import QuesPage from './Pages/QuesPage'
-//import Dashboard from './Pages/Dashboard'
-//import Option from '../component/Option/Option'
-//import vote from '../component/Option/vote.png'
-//import result from '../component/Option/result.png'
-//import hist from '../component/Option/hist.png'
-//import logout from '../component/Option/logout.png'
-//import afterPage from '../component/afterVote'
-
 import TopImg from '../component/TopImg/TopImg'
 import Register from '../component/navbar/Register'
 import Login from '../component/navbar/Login'
 import './App.css';
 import Navbar from '../component/navbar'
-import { View, Vote, Create, Edit } from './Election'
+import { View, Vote, TwoStageVote, Create } from './Election'
 import { AllUser, Profile } from './User'
 
 const Div = styled.div`
@@ -30,12 +17,6 @@ const Div = styled.div`
 `;
 
 class App extends React.Component {
-
-  constructor(props) {
-    super(props);
-    this.state = { apiResponse: "" };
-  }
-
   render() {
     return (
       <div className="App" id="App">
@@ -47,18 +28,13 @@ class App extends React.Component {
             <Switch>
               <Route exact path="/" component={TopImg}></Route>
               <Route exact path="/vote"><View /></Route>
-              <Route path="/vote/:id">{({ match }) => <Vote electionId={match.params.id} />}</Route>
+              <Route path="/vote/simple/:id">{({ match }) => <Vote electionId={match.params.id} />}</Route>
+              <Route path="/vote/twoStage/:id">{({ match }) => <TwoStageVote electionId={match.params.id} />}</Route>
               <Route exact path="/login"><Login /></Route>
               <Route exact path="/register"><Register /></Route>
               <Route exact path="/create"><Create new={true} /></Route>
-              <Route path="/edit/:id">{({ match }) => <Edit id={match.params.id} />}</Route>
               <Route exact path="/user"><AllUser /></Route>
               <Route path="/user/:id">{({ match }) => <Profile uid={match.params.id} />}</Route>
-              {/*
-              <Route path="/vote/afterPage" component={afterPage}></Route>
-              <Route path="/hist" component={ChooseQues}></Route>
-              <Route path="/result" render={() => (<ResultChart text={"some text"} />)}></Route>
-               */}
               <Route path="/redirect/:name">
                 {({ match }) => {
                   this.forceUpdate();
@@ -73,25 +49,7 @@ class App extends React.Component {
           </div>
           <br />
           <div className="bottomBar" >
-            {/*
-            <NavLink activeClassName="selected" to="/vote">
-              <Option src={vote} scale={100} />
-            </NavLink>
-
-            <NavLink activeClassName="selected" to="/result">
-              <Option src={result} scale={100} />
-            </NavLink>
-
-            <NavLink activeClassName="selected" to="/create">
-              <Option src={hist} scale={100} />
-            </NavLink>
-
-            <NavLink activeClassName="selected" to="/">
-              <Option src={logout} scale={100} />
-            </NavLink>
-            */}
             <ButtonGroup>
-              {/* ToBeFix: clicking on button margin won't trigger link */}
               <Button className="button-link" outline color="info"><Link to="/vote"><Div>Elections</Div></Link></Button>
               <Button className="button-link" outline color="info"><Link to="/create"><Div>Create Election</Div></Link></Button>
               <Button className="button-link" outline color="info"><Link to="/user"><Div>Users</Div></Link></Button>

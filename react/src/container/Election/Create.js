@@ -12,9 +12,8 @@ import {
   InputGroupText
 } from 'reactstrap'
 import { NavLink } from 'react-router-dom'
-import styled from 'styled-components'
 
-import { CREATE_ELECTION_MUTATION, UPDATE_ELECTION_MUTATION, USERS_QUERY } from '../../graphql'
+import { CREATE_GENERAL_ELECTION_MUTATION, USERS_QUERY } from '../../graphql'
 
 const Choices = props => {
   return (
@@ -34,12 +33,13 @@ const Choices = props => {
 class CreateElection extends React.Component {
   constructor(props) {
     super(props);
-    this.title = props.new ? null : props.title;
-    this.body = props.new ? null : props.body;
-    this.open = props.new ? false : props.open;
+    this.twoStage = false;
+    this.title =  null;
+    this.body = null ;
+    this.open = false;
     this.users = [];
     this.state = {
-      choices: props.new ? [""] : props.choices
+      choices: [""]
     };
   }
 
@@ -64,11 +64,18 @@ class CreateElection extends React.Component {
       return state;
     })
   }
+  getId = data => {
+    if(!data.createGeneralElection) return;
+    if(data.createGeneralElection.type === "simpleElection") {
+      return data.createGeneralElection.simpleElection.id;
+    }
+    else return data.createGeneralElection.twoStageElection.id;
+  }
 
   render() {
     return (
       <Mutation
-        mutation={this.props.new ? CREATE_ELECTION_MUTATION : UPDATE_ELECTION_MUTATION}>
+        mutation={CREATE_GENERAL_ELECTION_MUTATION}>
         {(createElection, { data, error }) => {
           return (
             <Form
@@ -77,17 +84,10 @@ class CreateElection extends React.Component {
                 e.preventDefault();
                 let voters = this.users.filter(user => user.included);
                 voters = voters.map(voter => voter.id);
-                this.props.new
-                  ?
-                  createElection({ variables: { title: this.title, body: this.body, choices: this.state.choices, open: this.open, voters: voters } })
-                  :
-                  createElection({ variables: { id: this.props.id, title: this.title, body: this.body, choices: this.state.choices, open: this.open, voters: voters } })
-
+                createElection({ variables: { type: this.twoStage?"twoStageElection":"simpleElection", title: this.title, body: this.body, choices: this.state.choices, open: this.open, voters: voters } })
               }}
             >
-              {error ? <Alert color="danger">Create Election Fail!</Alert> : null}
-              {(data && data.createElection) ? <Alert color="success">Create election success! <NavLink to={`/vote/${data.createElection.id}`}>View your election now!</NavLink></Alert> : null}
-              {(data && data.updateElection) ? <Alert color="success">Update election success! <NavLink to={`/vote/${data.updateElection.id}`}>View your election now!</NavLink></Alert> : null}
+              
               <br />
 
               <FormGroup >
@@ -107,10 +107,18 @@ class CreateElection extends React.Component {
               </FormGroup><br />
               <FormGroup check>
                 <Label check>
-                  <Input type="checkbox" defaultChecked={this.open} onChange={e => {
+                  <Input type="checkbox" onChange={e => {
                     this.open = e.target.checked;
                   }} />{' '}
                   Start this election when created
+                </Label>
+              </FormGroup><br />
+              <FormGroup check>
+                <Label check>
+                  <Input type="checkbox" onChange={e => {
+                    this.twoStage = e.target.checked;
+                  }} />{' '}
+                  Create a two stage election
                 </Label>
               </FormGroup><br />
               <FormGroup>
@@ -120,8 +128,7 @@ class CreateElection extends React.Component {
                     if (loading || !(data.users)) return <Label>Loading...</Label>;
                     if (error) return <Alert color="danger">Loading User Error!</Alert>;
                     if (this.users.length !== data.users.length) {
-                      if (this.props.new) this.users = data.users.map(user => ({ id: user.id, included: false }));
-                      else this.users = data.users.map(user => ({ id: user.id, included: this.props.voters.findIndex(voter => voter.id === user.id) !== -1 }));
+                      this.users = data.users.map(user => ({ id: user.id, included: false }));
                     }
                     return data.users.map((user, idx) => {
                       return (
@@ -142,8 +149,10 @@ class CreateElection extends React.Component {
 
               </FormGroup><br />
               <Button type="submit" color="primary">
-                {this.props.new ? "Create" : "Update"}
-              </Button>
+                Create
+              </Button><br />
+              {error ? <Alert color="danger">Create Election Fail!</Alert> : null}
+              {(data && data.createGeneralElection) ? <Alert color="success">Create election success! <NavLink to={`/vote/${this.twoStage?"twoStage":"simple"}/${this.getId(data)}`}>View your election now!</NavLink></Alert> : null}
             </Form>
           )
         }}

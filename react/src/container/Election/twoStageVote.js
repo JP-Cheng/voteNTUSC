@@ -1,7 +1,8 @@
 import React from 'react'
 import { Query, Mutation } from 'react-apollo'
-import { ELECTION_QUERY, BALLOTS_SUBSCRIPTION, CREATE_BALLOT_MUTATION } from '../../graphql/index'
 import { Button, Alert } from 'reactstrap'
+import { TWO_STAGE_ELECTION_QUERY, CREATE_COMMITMENT_MUTATION, CREATE_OPENING_MUTATION } from '../../graphql/index'
+import { myHash } from '../../hash'
 import './Vote.css'
 
 const countVote = (id, ballots) => ballots.filter(ballot => ballot.choice === id).length;
@@ -9,28 +10,46 @@ const countVote = (id, ballots) => ballots.filter(ballot => ballot.choice === id
 class VoteForm extends React.Component {
   constructor(props) {
     super(props);
-    this.createBallot = null;
+    this.submit = null;
+    this.secret = "";
+    this.state = {
+      msg: ""
+    }
   }
 
+  handleSecret = e => {this.secret = e.target.value};
   handleVote = e => {
     e.preventDefault();
+    if(this.secret === "") {
+      this.setState({msg: "請輸入密碼！"});
+      return;
+    }
     const choice = parseInt(e.target.id);
-    if (this.createBallot) {
-      this.createBallot({ variables: { electionId: this.props.electionId, choice: choice } });
+    const hashedChoice = myHash(e.target.id)
+    const hashedSecret = myHash(this.secret);
+    if(this.props.stage === "COMMIT") {
+      const commitment = myHash(`${hashedSecret}${hashedChoice}`);
+      this.submit({variables: {twoStageElectionId: this.props.electionId, commitment: commitment}});
+    }
+    else {
+      this.submit({variables: {twoStageElectionId: this.props.electionId, hashedSecret: hashedSecret, choice: choice}});
     }
   }
 
   render() {
+    const commit = this.props.stage === "COMMIT";
+    
     return (
-      <Mutation mutation={CREATE_BALLOT_MUTATION}>
-        {(createBallot, { data, error }) => {
-          this.createBallot = createBallot;
-          if (data && data.createBallot) return <strong>Thank You for your vote!</strong>;
+      <Mutation mutation={commit ? CREATE_COMMITMENT_MUTATION : CREATE_OPENING_MUTATION}>
+        {(create, { data, error }) => {
+          this.submit = create;
+          if (data && (data.createCommitment || data.createOpening)) return <strong>Thank You for your vote!</strong>;
           if (error) return <Alert color='danger'>Create ballot fail!</Alert>;
 
           return (
             <div className="election-ballot">
               投下神聖的一票：<br />
+              {`${commit?"設定":""}密碼: `}<input type="text" placeholder={this.state.msg} onChange={this.handleSecret} />
               {this.props.choices.map((choice, idx) => {
                 return (<>
                   <Button className="aChoice" color="info" id={idx} key={idx} onClick={this.handleVote}>{idx + 1}. {choice}</Button>
@@ -47,7 +66,7 @@ class VoteForm extends React.Component {
   }
 }
 
-class Vote extends React.Component {
+class twoStageVote extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -62,16 +81,19 @@ class Vote extends React.Component {
     })
   }
 
-  isVoted = voted => (voted.find(({ id }) => id === localStorage.uid));
-
-  isVoter = voter => (voter.find(({ id }) => id === localStorage.uid));
+  isVoted = voted => {
+    if (voted.find(({ id }) => id === localStorage.uid)) return true;
+    else return false;
+  }
 
   render() {
     return (
-      <Query query={ELECTION_QUERY} variables={{ electionId: this.props.electionId }}>
+      <Query query={TWO_STAGE_ELECTION_QUERY} variables={{ query: this.props.electionId }}>
         {({ data, loading, error, subscribeToMore }) => {
-          if (loading || !(data.election)) return <h1>Loading...</h1>;
+          if (loading || !(data.twoStageElection)) return <h1>Loading...</h1>;
           if (error) return <h1>Error!</h1>;
+          let election = data.twoStageElection;
+          /*
           subscribeToMore({
             document: BALLOTS_SUBSCRIPTION,
             variables: { electionId: data.election.id },
@@ -86,17 +108,30 @@ class Vote extends React.Component {
               }
             }
           })
-          let votable = false, text;
-          if(!data.election.open) {
-            text = "投票關閉中";
+          */
+          let votable, text;
+          if(election.state === "CLOSE") {
+            votable = false;
+            text = "尚未開始";
+          }
+          else if(election.state === "END") {
+            votable = false;
+            text = "投票已結束";
+          }
+          else if(!localStorage.uid && election.state === "OPEN") {
+            votable = true;
+            text = "參與開票";
           }
           else if(!localStorage.uid) {
+            votable = false;
             text = "請先登入";
           }
-          else if(!this.isVoter(data.election.voters)) {
-            text = "您不是選民";
+          else if(election.state === "OPEN") {
+            votable = false;
+            text = "請先登出";
           }
-          else if(this.isVoted(data.election.voted)) {
+          else if(this.isVoted(election.voted)) {
+            votable = false;
             text = "已投票";
           }
           else {
@@ -107,9 +142,9 @@ class Vote extends React.Component {
           return (
             <div className="election-card">
               <div className="election-title">
-                <h3>{data.election.title}</h3>
+                <h3>{election.title}</h3>
                 <div className="election-description">
-                  {data.election.body}
+                  {election.body}
                 </div>
               </div>
               <br />
@@ -117,22 +152,22 @@ class Vote extends React.Component {
               <div className="election-body">
                 <div className="election-choices">
                   <span className="election-info">這個選舉有以下這些選項：</span><br />
-                  {data.election.choices.map((choice, idx) => {
+                  {election.choices.map((choice, idx) => {
                     return (<>
-                      <div className="aChoice" key={idx}>{idx + 1}. {choice} ({countVote(idx, data.election.ballots)}) </div>
+                      <div className="aChoice" key={idx}>{idx + 1}. {choice} ({countVote(idx, election.ballots)}) </div>
                       <br />
                     </>)
                   })}
-                  <div className="aChoice">{`${data.election.choices.length + 1}. 廢票 (${countVote(-1, data.election.ballots)})`}</div>
+                  <div className="aChoice">{`${election.choices.length + 1}. 廢票 (${countVote(-1, election.ballots)})`}</div>
                 </div><br /><br />
                 <div className="election-info">
-                  已有<em>{data.election.ballots.length}/{data.election.voters.length}</em>人投下選票<br /><br />
-
+                  已有<em>{election.voted.length}/{election.voters.length}</em>人投下選票<br /><br />
+                  已有<em>{election.openings.length}/{election.commitments.length}</em>張選票開出<br /><br />
                 </div><br />
                 {
                   this.state.toggled
                   ?
-                  <VoteForm voted={data.election.voted} choices={data.election.choices} electionId={this.props.electionId} />                  
+                  <VoteForm stage={election.state} choices={election.choices} electionId={this.props.electionId} />
                   :
                   <Button color="primary" disabled={!votable} onClick={this.toggle}>{text}</Button>
                 }
@@ -145,4 +180,4 @@ class Vote extends React.Component {
   }
 }
 
-export default Vote;
+export default twoStageVote;

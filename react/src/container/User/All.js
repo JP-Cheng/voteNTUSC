@@ -1,7 +1,7 @@
 import React from 'react'
 import { Query } from 'react-apollo'
 import {
-  Alert, Card, CardGroup, CardText, CardBody,
+  Alert, Card, CardGroup,
   CardTitle
 } from 'reactstrap'
 import { NavLink } from 'react-router-dom'
@@ -28,10 +28,6 @@ const AllUser = () => {
 
                     </Card>
                   </NavLink>
-                  // <div className="user-block" key={user.id}>
-                  //   <span>{`${idx+1}. `}{`${user.name}`}</NavLink></span>
-                  //   <span>{` ${user.email}`}</span>
-                  // </div>
                 )
               })}
             </CardGroup>);
