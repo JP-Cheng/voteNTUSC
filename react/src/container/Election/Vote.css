@@ -1,0 +1,35 @@
+.election-card{
+    display: block;
+    margin: 15pt;
+    width: 40vw;
+    text-align: center;
+}
+
+.election-title{
+    border-bottom: 1pt solid rgb(218, 212, 212);
+    margin-bottom: 3pt;
+    padding-bottom: 3pt;
+    width: 24em;
+    text-align: left;
+}
+
+.election-description{
+    font-size: 16pt;
+}
+
+.election-body{
+    height: 50vh;
+    width: 40vw;
+    text-align: center;
+    overflow-y: scroll;
+}
+
+.aChoice{
+    width: 12em;
+    margin: 2pt;
+    text-align: left;
+    font-size: 14pt;
+}
+.election-info{
+    font-size: 10pt;
+}

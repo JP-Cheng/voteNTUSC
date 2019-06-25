@@ -34,7 +34,6 @@ class App extends React.Component {
     return (
       <div className="App" id="App">
         
-        
         <BrowserRouter basename="">
           <Navbar className="top" />
 
