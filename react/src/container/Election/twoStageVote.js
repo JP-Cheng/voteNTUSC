@@ -180,6 +180,9 @@ class twoStageVote extends React.Component {
                   已有<em>{election.voted.length}/{election.voters.length}</em>人投下選票<br /><br />
                   已有<em>{election.openings.length}/{election.commitments.length}</em>張選票開出<br /><br />
                 </div><br />
+                <Button color="primary" disabled={!votable} onClick={this.toggle}>
+                  {this.state.toggled ? "返回" : text}
+                </Button>
                 {
                   this.state.toggled
                     ?
@@ -188,7 +191,9 @@ class twoStageVote extends React.Component {
                     null
                 }
                 <br />
-                <Button color="primary" disabled={!votable} onClick={this.toggle}>{this.state.toggled ? "返回" : text}</Button>
+                <Button color="info" disabled={election.state === "CLOSE"} onClick={this.commitmentToggle}>
+                  {this.state.commitmentToggled ? "關閉" : "查看選票"}
+                </Button>
                 {
                   this.state.commitmentToggled
                     ?
@@ -204,21 +209,27 @@ class twoStageVote extends React.Component {
                     null
                 }
                 <br />
-                <Button color="info" disabled={election.state === "CLOSE"} onClick={this.commitmentToggle}>{this.state.commitmentToggled ? "關閉" : "查看選票"}</Button>
+                <Button color="success" disabled={election.state === "CLOSE" || election.state === "COMMIT"}
+                  onClick={this.openingToggle}>
+                  {this.state.openingToggled ? "關閉" : "查看開票證明"}
+                </Button>
                 {
                   this.state.openingToggled
                     ?
-                    <div>
+                    <div style={{ wordBreak: 'break-word', width: '40vw' }}>
                       {election.openings.map((_opening, idx) => {
-                        return <span key={_opening.id}>{idx}. {_opening.hashedSecret}, {_opening.hashedChoice} </span>;
+                        return (
+                          <>
+                            <span key={_opening.id}>{idx + 1}. {_opening.hashedSecret}, {_opening.hashedChoice} </span>
+                            <br />
+                          </>);
                       })}
-
                     </div>
                     :
                     null
                 }
                 <br />
-                <Button color="success" disabled={election.state === "CLOSE" || election.state === "COMMIT"} onClick={this.openingToggle}>{this.state.openingToggled ? "關閉" : "查看開票證明"}</Button>
+
               </div>
             </div>
           )
