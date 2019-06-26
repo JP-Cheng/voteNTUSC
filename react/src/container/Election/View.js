@@ -14,11 +14,12 @@ const electionBlock = ({ id, title, body, creator, open }) => {
     <Card key={id} style={{
       width: '20em', height: '14em', margin: '0.5em',
       border: '1pt solid  rgba(218, 212, 212, 0.4)',
-      textAlign: 'left', padding: '0.2em 1em 0.2em 1em'
+      textAlign: 'left', padding: '0.2em 1em 0.2em 1em',
+      display: 'inline-block'
     }}>
       <CardBody>
         <CardTitle>
-          {(title.length > 28) ? (title.substring(0, 27) + '...') : (title)}
+          {(title.length > 14) ? (title.substring(0, 13) + '...') : (title)}
         </CardTitle>
         <br />
         <CardSubtitle>
@@ -80,9 +81,12 @@ class View extends React.Component {
           return (
             <>
               <h2 className="all-elections-title">All Elections</h2>
-              <CardGroup>
+              <div style={{
+                overflowX: 'scroll', height: '55vh', width: '60vw', display: 'flow',
+                textAlign: 'left'
+              }}>
                 {data.elections.map(election => electionBlock(election))}
-              </CardGroup>
+              </div>
             </>);
 
         }}

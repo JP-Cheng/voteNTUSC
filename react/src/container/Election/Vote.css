@@ -1,3 +1,7 @@
+.all-elections-title {
+    margin: 0.3em;
+}
+
 .election-card{
     display: block;
     margin: 15pt;
@@ -17,11 +21,14 @@
     font-size: 12pt;
 }
 
-.election-body{
+.election-body {
     height: 50vh;
     width: 40vw;
     text-align: center;
+}
 
+.view-election {
+  margin-bottom: 10em;
 }
 
 .aChoice{

@@ -31,7 +31,8 @@
 
 .user-elections {
   margin-top: 3em;
-  width: 40em;
+  width: 60vw;
+  overflow-x: visible;
 }
 
 .user-election-button {

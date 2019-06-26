@@ -2,18 +2,16 @@
   position: absolute;
   top: 0%;
   left: 0%;
-  height: 10vh;
+  height: 8vh;
   width: 100%;
   margin-bottom: 3em;
 }
 
-.top{
-  height: 8vh;
-}
 
 .main {
   margin-top: 3em;
   height: 78vh;
+  width: 70vw;
   padding: 1.5em;
   text-align: center;
   overflow-y: scroll;
