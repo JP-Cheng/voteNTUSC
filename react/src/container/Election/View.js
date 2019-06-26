@@ -1,14 +1,14 @@
 import React from 'react'
 import { Query } from 'react-apollo'
 import {
-  CardGroup, Card, CardText, CardBody,
+  Card, CardText, CardBody,
   CardTitle, CardSubtitle, Button
 } from 'reactstrap'
 import { Link } from 'react-router-dom'
-import { ELECTIONS_QUERY, ELECTION_SUBSCRIPTION } from '../../graphql/index'
+import { ALL_ELECTIONS_QUERY, ELECTION_SUBSCRIPTION } from '../../graphql/index'
 import './Vote.css'
 
-const electionBlock = ({ id, title, body, creator, open }) => {
+const electionBlock = ({ id, type, title, body, creator }) => {
   return (
     // .css don't work here; please use inline css
     <Card key={id} style={{
@@ -27,8 +27,10 @@ const electionBlock = ({ id, title, body, creator, open }) => {
         </CardSubtitle>
         <CardText>
           Description: {(body.length > 9) ? (body.substring(0, 8) + '...') : (body)}
+          <br />
+          <i style={{ color: "gray" }}>{type}</i>
         </CardText>
-        <Link to={"/vote/" + id}><Button color="success" disabled={!open}>View</Button></Link>
+        <Link to={`/vote/${(type === "simpleElection") ? "simple" : "twoStage"}/${id}`}><Button color="success">View</Button></Link>
       </CardBody>
     </Card>
   )
@@ -44,13 +46,14 @@ class View extends React.Component {
 
   render() {
     return (
-      <Query query={ELECTIONS_QUERY}>
+      <Query query={ALL_ELECTIONS_QUERY}>
         {({ data, loading, error, subscribeToMore }) => {
-          if (loading || !(data.elections)) return <h1>Loading...</h1>;
+          if (loading || !(data.allElections)) return <h1>Loading...</h1>;
           if (error) {
             console.error(error);
             return <h1>Something went wrong...</h1>;
           }
+          /*
           subscribeToMore({
             document: ELECTION_SUBSCRIPTION,
             updateQuery: (prev, { subscriptionData }) => {
@@ -78,16 +81,20 @@ class View extends React.Component {
               }
             }
           })
+          */
           return (
-            <>
+            <React.Fragment>
               <h2 className="all-elections-title">All Elections</h2>
               <div style={{
                 overflowX: 'scroll', height: '55vh', width: '60vw', display: 'flow',
                 textAlign: 'left'
               }}>
-                {data.elections.map(election => electionBlock(election))}
+                {data.allElections.map(election => {
+                  if (election.type === "simpleElection") return electionBlock({ type: election.type, ...election.simpleElection });
+                  else return electionBlock({ type: election.type, ...election.twoStageElection });
+                })}
               </div>
-            </>);
+            </React.Fragment>);
 
         }}
       </Query>

@@ -1,0 +1,227 @@
+import React from 'react'
+import { Query, Mutation } from 'react-apollo'
+import { Button, Alert } from 'reactstrap'
+import { TWO_STAGE_ELECTION_QUERY, CREATE_COMMITMENT_MUTATION, CREATE_OPENING_MUTATION } from '../../graphql/index'
+import { myHash } from '../../hash'
+import './Vote.css'
+
+const countVote = (id, ballots) => ballots.filter(ballot => ballot.choice === id).length;
+
+class VoteForm extends React.Component {
+  constructor(props) {
+    super(props);
+    this.submit = null;
+    this.secret = "";
+    this.state = {
+      msg: ""
+    }
+  }
+
+  handleSecret = e => {this.secret = e.target.value};
+  handleVote = e => {
+    e.preventDefault();
+    if(this.secret === "") {
+      this.setState({msg: "請輸入密碼！"});
+      return;
+    }
+    const choice = parseInt(e.target.id);
+    const hashedChoice = myHash(e.target.id)
+    const hashedSecret = myHash(this.secret);
+    if(this.props.stage === "COMMIT") {
+      const commitment = myHash(`${hashedSecret}${hashedChoice}`);
+      this.submit({variables: {twoStageElectionId: this.props.electionId, commitment: commitment}});
+    }
+    else {
+      this.submit({variables: {twoStageElectionId: this.props.electionId, hashedSecret: hashedSecret, choice: choice}});
+    }
+  }
+
+  render() {
+    const commit = this.props.stage === "COMMIT";
+    
+    return (
+      <Mutation mutation={commit ? CREATE_COMMITMENT_MUTATION : CREATE_OPENING_MUTATION}>
+        {(create, { data, error }) => {
+          this.submit = create;
+          if (data && (data.createCommitment || data.createOpening)) return <strong>Thank You for your vote!</strong>;
+          if (error) return <Alert color='danger'>Create ballot fail!</Alert>;
+
+          return (
+            <div className="election-ballot">
+              投下神聖的一票：<br />
+              {`${commit?"設定":""}密碼: `}<input type="text" placeholder={this.state.msg} onChange={this.handleSecret} /><br />
+              {this.props.choices.map((choice, idx) => {
+                return (<>
+                  <Button className="aChoice" color="info" id={idx} key={idx} onClick={this.handleVote}>{idx + 1}. {choice}</Button>
+                  <br />
+                </>)
+              })}
+              <Button className="aChoice" color="danger" id={-1} key={-1} onClick={this.handleVote}>投廢票</Button>
+              <br />
+            </div>
+          )
+        }}
+      </Mutation>
+    )
+  }
+}
+
+class twoStageVote extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      toggled: false,
+      commitmentToggled: false,
+      openingsToggled: false
+    }
+  }
+
+  toggle = _ => {
+    this.setState(state => {
+      state.toggled = !state.toggled;
+      return state;
+    })
+  }
+
+  commitmentToggle = _ => {
+    this.setState(state => {
+      state.commitmentToggled = !state.commitmentToggled;
+      return state;
+    })
+  }
+
+  openingToggle = _ => {
+    this.setState(state => {
+      state.openingToggled = !state.openingToggled;
+      return state;
+    })
+  }
+
+  isVoted = voted => {
+    if (voted.find(({ id }) => id === localStorage.uid)) return true;
+    else return false;
+  }
+
+  render() {
+    return (
+      <Query query={TWO_STAGE_ELECTION_QUERY} variables={{ query: this.props.electionId }}>
+        {({ data, loading, error, subscribeToMore }) => {
+          if (loading || !(data.twoStageElection)) return <h1>Loading...</h1>;
+          if (error) return <h1>Error!</h1>;
+          let election = data.twoStageElection;
+          /*
+          subscribeToMore({
+            document: BALLOTS_SUBSCRIPTION,
+            variables: { electionId: data.election.id },
+            updateQuery: (prev, { subscriptionData }) => {
+              if (!(subscriptionData.data) || subscriptionData.data.ballots.mutation !== 'CREATED') return prev;
+              else {
+                if (data.election.ballots.findIndex(ballot => {
+                  return ballot.id === subscriptionData.data.ballots.data.id;
+                }) !== -1) return prev;
+                prev.election.ballots.push(subscriptionData.data.ballots.data);
+                return prev;
+              }
+            }
+          })
+          */
+          let votable, text;
+          if(election.state === "CLOSE") {
+            votable = false;
+            text = "尚未開始";
+          }
+          else if(election.state === "END") {
+            votable = false;
+            text = "投票已結束";
+          }
+          else if(!localStorage.uid && election.state === "OPEN") {
+            votable = true;
+            text = "參與開票";
+          }
+          else if(!localStorage.uid) {
+            votable = false;
+            text = "請先登入";
+          }
+          else if(election.state === "OPEN") {
+            votable = false;
+            text = "請先登出";
+          }
+          else if(this.isVoted(election.voted)) {
+            votable = false;
+            text = "已投票";
+          }
+          else {
+            votable = true;
+            text = "參與投票";
+          }
+
+          return (
+            <div className="election-card">
+              <div className="election-title">
+                <h3>{election.title}</h3>
+                <div className="election-description">
+                  {election.body}
+                </div>
+              </div>
+              <br />
+
+              <div className="election-body">
+                <div className="election-choices">
+                  <span className="election-info">這個選舉有以下這些選項：</span><br />
+                  {election.choices.map((choice, idx) => {
+                    return (<>
+                      <div className="aChoice" key={idx}>{idx + 1}. {choice} ({countVote(idx, election.ballots)}) </div>
+                      <br />
+                    </>)
+                  })}
+                  <div className="aChoice">{`${election.choices.length + 1}. 廢票 (${countVote(-1, election.ballots)})`}</div>
+                </div><br /><br />
+                <div className="election-info">
+                  已有<em>{election.voted.length}/{election.voters.length}</em>人投下選票<br /><br />
+                  已有<em>{election.openings.length}/{election.commitments.length}</em>張選票開出<br /><br />
+                </div><br />
+                {
+                  this.state.toggled
+                  ?
+                  <VoteForm stage={election.state} choices={election.choices} electionId={this.props.electionId} />
+                  :
+                  null
+                }
+                <br />
+                <Button color="primary" disabled={!votable} onClick={this.toggle}>{this.state.toggled?"返回":text}</Button>
+                {
+                  this.state.commitmentToggled
+                  ?
+                  <div>
+                    {election.commitments.map((_commitment, idx) => {
+                      return <span key={_commitment.id}>{idx+1}. {_commitment.commitment} </span>;
+                    })}
+                  </div>
+                  :
+                  null
+                }
+                <br />
+                <Button color="info" disabled={election.state === "CLOSE"} onClick={this.commitmentToggle}>{this.state.commitmentToggled?"關閉":"查看選票"}</Button>
+                {
+                  this.state.openingToggled
+                  ?
+                  <div>
+                    {election.openings.map((_opening, idx) => {
+                      return <span key={_opening.id}>{idx}. {_opening.hashedSecret}, {_opening.hashedChoice} </span>;
+                    })}
+                  </div>
+                  :
+                  null
+                }
+                <br />
+                <Button color="success" disabled={election.state === "CLOSE" || election.state=== "COMMIT"} onClick={this.openingToggle}>{this.state.openingToggled?"關閉":"查看開票證明"}</Button>
+              </div>
+            </div>
+          )
+        }}
+      </Query>
+    )
+  }
+}
+
+export default twoStageVote;

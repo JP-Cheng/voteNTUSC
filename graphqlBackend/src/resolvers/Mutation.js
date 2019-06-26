@@ -79,6 +79,70 @@ const Mutation = {
     user.pwdHash = null;
     return user;
   },
+  async createGeneralElection(parent, args, { me, db, pubsub, req }, info) {
+    console.log("Creating Election...")
+    if(!me) throw new Error("CreateGeneralElection Error: Not Login");
+    if(args.data.voters.length === 0) throw new Error("CreateGeneralElection Error: No Voters");
+    if(args.data.type !== "simpleElection" && args.data.type !== "twoStageElection") throw new Error("CreateGeneralElection Error: Invalid Type");
+    
+    const simple = args.data.type === "simpleElection";
+    
+    if(simple) {
+      await db.elections.findOne({title: args.data.title})
+      .then(_election => {
+        if(_election) throw new Error("CreateElection Error: Title Already Exist");
+      })
+      .catch(err => {throw err});
+    }
+    else {
+      await db.twoStageElections.findOne({title: args.data.title})
+      .then(_election => {
+        if(_election) throw new Error("CreateTwoStageElection Error: Title Already Exist");
+      })
+      .catch(err => {throw err});
+    }
+
+    const creator = await findUser(db, me._id);
+    let newElection;
+    if(simple) {
+      delete args.data.type;
+      newElection = db.elections({ ...args.data, creator: creator._id, voted: [] });
+    }
+    else {
+      delete args.data.type;
+      args.data.state = args.data.open?"COMMIT":"CLOSE";
+      delete args.data.open;
+      newElection = db.twoStageElections({ ...args.data, creator: creator._id, voted: [] });
+    }
+    
+    let election = await newElection.save().then(_ => {
+      console.log("Election created", newElection.toObject());
+      return newElection.toObject(); 
+    })
+    .catch(err => {throw err;});
+
+    election.creator = creator.toObject();
+    if(simple){
+      pubsub.publish('election', {
+        elections: {
+          mutation: 'CREATED',
+          electionId: election._id,
+          data: election
+        }
+      })
+      return {type: "simpleElection", simpleElection: election};
+    }
+    else {
+      pubsub.publish('twoStageElection', {
+        twoStageElections: {
+          mutation: 'CREATED',
+          electionId: election._id,
+          data: election
+        }
+      })
+      return {type: "twoStageElection", twoStageElection: election};
+    }
+  },
   async createElection(parent, args, { me, db, pubsub, req }, info) {
     console.log("Creating Election...")
     if(!me) throw new Error("CreateElection Error: Not Login");
@@ -121,39 +185,13 @@ const Mutation = {
     .catch(err => {throw err});
   },
   async updateElection(parent, args, { me, db, pubsub }, info) {
-    const { id, data } = args
-    const { title, body, choices, open, voters } = data;
+    const { id } = args
 
     let election = await findElection(db, id);
     if(!me) throw new Error("UpdateElection Error: Not Login");
     if(election.creator.toString() !== me._id) throw new Error("UpdateElection Error: Not Creator");
-    if(election.voted.length !== 0 && (title || body || voters || open)) throw new Error("UpdateElection Error: Election Already Started")
-
-    if (typeof title === 'string') {
-      await db.elections.findOne({title: title})
-      .then(_election => {
-        if(_election && _election._id.toString() !== id) throw new Error("UpdateElection Error: Title Already Exist")
-      })
-      .catch(err => {throw err});
-
-      election.title = title;
-    }
-
-    if (typeof body === 'string') {
-      election.body = body;
-    }
-
-    if(Array.isArray(choices)) {
-      election.choices = choices;
-    }
-
-    if (typeof open === 'boolean') {
-      election.open = open;
-    }
-
-    if(Array.isArray(voters)) {
-      election.voters = voters;
-    }
+    
+    election.open = !election.open;
 
     await election.save();
     pubsub.publish('election', {
@@ -209,18 +247,16 @@ const Mutation = {
     .catch(err => {throw err});
   },
   async updateTwoStageElection(parent, args, { me, db, pubsub }, info) {
-    const { id, state: newState } = args;
+    const { id } = args;
     let election = await findTwoStageElection(db, id);
     let state = election.state;
     if(!me) throw new Error("UpdateTwoStageElection Error: Not Login");
     if(election.creator.toString() !== me._id) throw new Error("UpdateTwoStageElection Error: Not Creator");
-    if(newState !== "CLOSE" && newState !== "COMMIT" && newState !== "OPEN") throw new Error("UpdateTwoStageElection Error: Invalid State");
-    if(election.voted.length !== 0 && state === "CLOSE") throw new Error("UpdateTwoStageElection Error: Election Already Ended");
-    if((state === "CLOSE" && newState !== "COMMIT") || (state === "COMMIT" && newState !== "OPEN") || (state === "OPEN" && newState !== "CLOSE")) {
-      throw new Error("UpdateTwoStageElection Error: Invalid Operation");
-    }
+    if(state === "END") throw new Error("UpdateTwoStageElection Error: Election Already Ended");
 
-    election.state = newState;
+    if(state === "CLOSE") election.state = "COMMIT";
+    else if(state === "COMMIT") election.state = "OPEN";
+    else if(state === "OPEN") election.state = "END";
     await election.save();
     
     pubsub.publish('twoStageElection', {

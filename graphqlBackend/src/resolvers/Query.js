@@ -68,6 +68,39 @@ const Query = {
     .then(doc => doc)
     .catch(err => {throw err});
   },
+  async allElections(parent, args, { db }, info) {
+    const _str = new RegExp(args.query, 'i');
+    console.log("Looking for TwoStageElections:", _str);
+    let _twoStageElections, _simpleElections;
+    if (!args.query) {
+      // return all elections
+      _twoStageElections = await db.twoStageElections.find({})
+      .then(docs => {return docs;})
+      .catch(err => {throw err});
+      _simpleElections = await db.elections.find({})
+      .then(docs => {return docs;})
+      .catch(err => {throw err});
+
+    }
+    else {
+      // Exec case insensitive LIKE query
+      _twoStageElections = await db.twoStageElections.find({ $or: [{title: _str}, {body: _str}]})
+      .then(docs => {return docs;})
+      .catch(err => {throw err});
+      _simpleElections = await db.elections.find({ $or: [{title: _str}, {body: _str}]})
+      .then(docs => {return docs;})
+      .catch(err => {throw err});
+    }
+    _simpleElections = _simpleElections.map(_election => ({
+      type: "simpleElection",
+      simpleElection: _election.toObject()
+    }))
+    _twoStageElections = _twoStageElections.map(_election => ({
+      type: "twoStageElection",
+      twoStageElection: _election.toObject()
+    }));
+    return _simpleElections.concat(_twoStageElections);
+  },
   async ballots(parent, args, { db }, info) {
     return await db.ballots.find({election: args.electionId})
     .then(docs => docs)

@@ -22,35 +22,63 @@ const USERS_QUERY = gql`
 const USER_QUERY = gql`
   query user($uid: ID!) {
     user(uid: $uid) {
-      id
-      name
-      email
-      createdElections {
-        id title body open
-        creator {
-          id name
+      id name email
+      createdGeneralElections {
+        type
+        simpleElection {
+          id title body open
+          creator { id name }
         }
-        voted {
-          id
-        }
-      }
-      voteableElections {
-        id title body open
-        creator {
-          id name
-        }
-        voted {
-          id
+        twoStageElection {
+          id title body state
+          creator { id name }
         }
       }
-      votedElections {
-        id title body open
-        creator {
-          id name
+      votableGeneralElections {
+        type
+        simpleElection {
+          id title body open
+          creator { id name }
         }
-        voted {
-          id
+        twoStageElection {
+          id title body state
+          creator { id name }
         }
+      }
+      votedGeneralElections {
+        type
+        simpleElection {
+          id title body open
+          creator { id name }
+        }
+        twoStageElection {
+          id title body state
+          creator { id name }
+        }
+      }
+    }
+  }
+`
+
+const ALL_ELECTIONS_QUERY = gql`
+  query allElections($query: String) {
+    allElections(query: $query) {
+      type
+      simpleElection {
+        id title body open choices
+        creator { id name }
+        ballots { id choice }
+        voters { id name }
+        voted { id name }
+      }
+      twoStageElection {
+        id title body state choices
+        creator { id name }
+        commitments { id commitment }
+        openings { id hashedChoice hashedSecret }
+        ballots { id choice }
+        voters { id name }
+        voted { id name }
       }
     }
   }
@@ -104,6 +132,20 @@ const ELECTION_QUERY = gql`
   }
 `
 
+const TWO_STAGE_ELECTION_QUERY = gql`
+query twoStageElection($query: ID!) {
+  twoStageElection(query: $query) {
+    id title body state choices
+    creator { id name }
+    commitments { id commitment }
+    openings { id hashedChoice hashedSecret }
+    ballots { id choice }
+    voters { id name }
+    voted { id name }
+  }
+}
+`
+
 const BALLOTS_QUERY = gql`
   query ballots($electionId: ID!) {
     ballots(electionId: $electionId) {
@@ -141,4 +183,8 @@ const ME_QUERY = gql`
   }
 `
 
-export { USERS_QUERY, USER_QUERY, ELECTIONS_QUERY, ELECTION_QUERY, BALLOTS_QUERY, BALLOT_QUERY, ME_QUERY }
+export { 
+  USERS_QUERY, USER_QUERY, 
+  ALL_ELECTIONS_QUERY, ELECTIONS_QUERY, ELECTION_QUERY, TWO_STAGE_ELECTION_QUERY,
+  BALLOTS_QUERY, BALLOT_QUERY, 
+  ME_QUERY }

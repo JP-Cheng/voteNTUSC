@@ -20,15 +20,8 @@ class VoteForm extends React.Component {
     }
   }
 
-  isVoted = voted => {
-    if (voted.find(({ id }) => id === localStorage.uid)) return true;
-    else return false;
-  }
-
   render() {
-    if (localStorage.uid && this.isVoted(this.props.voted)) return <strong>Thank you for your vote!</strong>;
-    else if (!(localStorage.uid)) return <strong>Please login to vote.</strong>;
-    else return (
+    return (
       <Mutation mutation={CREATE_BALLOT_MUTATION}>
         {(createBallot, { data, error }) => {
           this.createBallot = createBallot;
@@ -55,6 +48,23 @@ class VoteForm extends React.Component {
 }
 
 class Vote extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      toggled: false
+    }
+  }
+
+  toggle = _ => {
+    this.setState(state => {
+      state.toggled = !state.toggled;
+      return state;
+    })
+  }
+
+  isVoted = voted => (voted.find(({ id }) => id === localStorage.uid));
+
+  isVoter = voter => (voter.find(({ id }) => id === localStorage.uid));
 
   render() {
     return (
@@ -76,6 +86,24 @@ class Vote extends React.Component {
               }
             }
           })
+          let votable = false, text;
+          if(!data.election.open) {
+            text = "投票關閉中";
+          }
+          else if(!localStorage.uid) {
+            text = "請先登入";
+          }
+          else if(!this.isVoter(data.election.voters)) {
+            text = "您不是選民";
+          }
+          else if(this.isVoted(data.election.voted)) {
+            text = "已投票";
+          }
+          else {
+            votable = true;
+            text = "參與投票";
+          }
+
           return (
             <div className="election-card">
               <div className="election-title">
@@ -99,13 +127,17 @@ class Vote extends React.Component {
                 </div><br /><br />
                 <div className="election-info">
                   已有<em>{data.election.ballots.length}/{data.election.voters.length}</em>人投下選票<br /><br />
-                  {/* 目前票數統計：<br />
-                {data.election.choices.map((choice, idx) => {
-                  return `${idx + 1}. ${choice}: ${countVote(idx, data.election.ballots)}票 `
-                })} */}
 
                 </div><br />
-                <VoteForm voted={data.election.voted} choices={data.election.choices} electionId={this.props.electionId} />
+                {
+                  this.state.toggled
+                  ?
+                  <VoteForm voted={data.election.voted} choices={data.election.choices} electionId={this.props.electionId} />                  
+                  :
+                  null
+                }
+                <br />
+                <Button color="primary" disabled={!votable} onClick={this.toggle}>{this.state.toggled? "返回" : text}</Button>
               </div>
             </div>
           )

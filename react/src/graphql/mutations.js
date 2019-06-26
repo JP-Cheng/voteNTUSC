@@ -29,21 +29,23 @@ mutation updateUser($name: String, $email: String, $pwd: String) {
 }
 `
 
-const CREATE_ELECTION_MUTATION = gql`
-mutation createElection($title: String!, $body: String!, $choices: [String!]!, $open: Boolean!, $voters: [ID!]!) {
-  createElection(data: {title: $title, body: $body, choices: $choices, open: $open, voters: $voters}) {
-    id title body choices open 
-    creator {
-      id name
-    } 
-    ballots {
-      id
-    } 
-    voters {
-      id
+const CREATE_GENERAL_ELECTION_MUTATION = gql`
+mutation createGeneralElection( $type: String!, $title: String!, $body: String!, $choices: [String!]!, $open: Boolean!, $voters: [ID!]!){
+  createGeneralElection(data: {type: $type, title: $title, body: $body, choices: $choices, open: $open, voters: $voters}) {
+    type
+    simpleElection {
+      id title body choices open 
+      creator { id name } 
+      ballots { id } 
+      voters { id }
+      voted { id }
     }
-    voted {
-      id
+    twoStageElection {
+      id title body choices state 
+      creator { id name } 
+      ballots { id } 
+      voters { id }
+      voted { id }
     }
   }
 }
@@ -55,22 +57,24 @@ mutation deleteElection($id: ID!) {
 }
 `
 
+const DELETE_TWO_STAGE_ELECTION_MUTATION = gql`
+mutation deleteTwoStageElection($id: ID!) {
+  deleteTwoStageElection(id: $id)
+}
+`
+
 const UPDATE_ELECTION_MUTATION = gql`
-mutation updateElection($id: ID!, $title: String, $body: String, $choices: [String!], $open: Boolean, $voters: [ID!]) {
-  updateElection(id: $id, data: {title: $title, body: $body, choices: $choices, open: $open, voters: $voters}) {
-    id title body choices open
-    creator {
-      id
-    }
-    ballots {
-      id
-    }
-    voters {
-      id
-    }
-    voted {
-      id
-    }
+mutation updateElection($id: ID!) {
+  updateElection(id: $id) {
+    id
+  }
+}
+`
+
+const UPDATE_TWO_STAGE_ELECTION_MUTATION = gql`
+mutation updateTwoStageElection($id: ID!) {
+  updateTwoStageElection(id: $id) {
+    id
   }
 }
 `
@@ -83,6 +87,25 @@ mutation createBallot($electionId: ID!, $choice: Int!) {
     election {
       id
     }
+  }
+}
+`
+
+const CREATE_COMMITMENT_MUTATION = gql`
+mutation createCommitment($twoStageElectionId: ID!, $commitment: String!) {
+  createCommitment(data: {twoStageElectionId: $twoStageElectionId, commitment: $commitment}) {
+    id
+    commitment
+  }
+}
+`
+
+const CREATE_OPENING_MUTATION = gql`
+mutation createOpening($twoStageElectionId: ID!, $hashedSecret: String!, $choice: Int!) {
+  createOpening(data: {twoStageElectionId: $twoStageElectionId, hashedSecret: $hashedSecret, choice: $choice}) {
+    id
+    hashedSecret
+    hashedChoice
   }
 }
 `
@@ -100,7 +123,9 @@ const LOGIN_MUTATION = gql`
 
 export { 
   REGISTER_MUTATION, DELETE_USER_MUTATION, UPDATE_USER_MUTATION,
-  CREATE_ELECTION_MUTATION, DELETE_ELECTION_MUTATION, UPDATE_ELECTION_MUTATION,
-  CREATE_BALLOT_MUTATION, 
+  CREATE_GENERAL_ELECTION_MUTATION,
+  UPDATE_ELECTION_MUTATION, UPDATE_TWO_STAGE_ELECTION_MUTATION,
+  DELETE_ELECTION_MUTATION, DELETE_TWO_STAGE_ELECTION_MUTATION,
+  CREATE_BALLOT_MUTATION, CREATE_COMMITMENT_MUTATION, CREATE_OPENING_MUTATION,
   LOGIN_MUTATION  
 }
