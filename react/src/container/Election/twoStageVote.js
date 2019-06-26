@@ -17,28 +17,28 @@ class VoteForm extends React.Component {
     }
   }
 
-  handleSecret = e => {this.secret = e.target.value};
+  handleSecret = e => { this.secret = e.target.value };
   handleVote = e => {
     e.preventDefault();
-    if(this.secret === "") {
-      this.setState({msg: "請輸入密碼！"});
+    if (this.secret === "") {
+      this.setState({ msg: "請輸入密碼！" });
       return;
     }
     const choice = parseInt(e.target.id);
     const hashedChoice = myHash(e.target.id)
     const hashedSecret = myHash(this.secret);
-    if(this.props.stage === "COMMIT") {
+    if (this.props.stage === "COMMIT") {
       const commitment = myHash(`${hashedSecret}${hashedChoice}`);
-      this.submit({variables: {twoStageElectionId: this.props.electionId, commitment: commitment}});
+      this.submit({ variables: { twoStageElectionId: this.props.electionId, commitment: commitment } });
     }
     else {
-      this.submit({variables: {twoStageElectionId: this.props.electionId, hashedSecret: hashedSecret, choice: choice}});
+      this.submit({ variables: { twoStageElectionId: this.props.electionId, hashedSecret: hashedSecret, choice: choice } });
     }
   }
 
   render() {
     const commit = this.props.stage === "COMMIT";
-    
+
     return (
       <Mutation mutation={commit ? CREATE_COMMITMENT_MUTATION : CREATE_OPENING_MUTATION}>
         {(create, { data, error }) => {
@@ -49,7 +49,7 @@ class VoteForm extends React.Component {
           return (
             <div className="election-ballot">
               投下神聖的一票：<br />
-              {`${commit?"設定":""}密碼: `}<input type="text" placeholder={this.state.msg} onChange={this.handleSecret} /><br />
+              {`${commit ? "設定" : ""}密碼: `}<input type="text" placeholder={this.state.msg} onChange={this.handleSecret} /><br />
               {this.props.choices.map((choice, idx) => {
                 return (<>
                   <Button className="aChoice" color="info" id={idx} key={idx} onClick={this.handleVote}>{idx + 1}. {choice}</Button>
@@ -126,27 +126,27 @@ class twoStageVote extends React.Component {
           })
           */
           let votable, text;
-          if(election.state === "CLOSE") {
+          if (election.state === "CLOSE") {
             votable = false;
             text = "尚未開始";
           }
-          else if(election.state === "END") {
+          else if (election.state === "END") {
             votable = false;
             text = "投票已結束";
           }
-          else if(!localStorage.uid && election.state === "OPEN") {
+          else if (!localStorage.uid && election.state === "OPEN") {
             votable = true;
             text = "參與開票";
           }
-          else if(!localStorage.uid) {
+          else if (!localStorage.uid) {
             votable = false;
             text = "請先登入";
           }
-          else if(election.state === "OPEN") {
+          else if (election.state === "OPEN") {
             votable = false;
             text = "請先登出";
           }
-          else if(this.isVoted(election.voted)) {
+          else if (this.isVoted(election.voted)) {
             votable = false;
             text = "已投票";
           }
@@ -182,39 +182,43 @@ class twoStageVote extends React.Component {
                 </div><br />
                 {
                   this.state.toggled
-                  ?
-                  <VoteForm stage={election.state} choices={election.choices} electionId={this.props.electionId} />
-                  :
-                  null
+                    ?
+                    <VoteForm stage={election.state} choices={election.choices} electionId={this.props.electionId} />
+                    :
+                    null
                 }
                 <br />
-                <Button color="primary" disabled={!votable} onClick={this.toggle}>{this.state.toggled?"返回":text}</Button>
+                <Button color="primary" disabled={!votable} onClick={this.toggle}>{this.state.toggled ? "返回" : text}</Button>
                 {
                   this.state.commitmentToggled
-                  ?
-                  <div>
-                    {election.commitments.map((_commitment, idx) => {
-                      return <span key={_commitment.id}>{idx+1}. {_commitment.commitment} </span>;
-                    })}
-                  </div>
-                  :
-                  null
+                    ?
+                    <div style={{ wordBreak: 'break-word', width: '40vw' }}>
+                      {election.commitments.map((_commitment, idx) => {
+                        return (<>
+                          <span key={_commitment.id}>{idx + 1}. {_commitment.commitment} </span>
+                          <br />
+                        </>);
+                      })}
+                    </div>
+                    :
+                    null
                 }
                 <br />
-                <Button color="info" disabled={election.state === "CLOSE"} onClick={this.commitmentToggle}>{this.state.commitmentToggled?"關閉":"查看選票"}</Button>
+                <Button color="info" disabled={election.state === "CLOSE"} onClick={this.commitmentToggle}>{this.state.commitmentToggled ? "關閉" : "查看選票"}</Button>
                 {
                   this.state.openingToggled
-                  ?
-                  <div>
-                    {election.openings.map((_opening, idx) => {
-                      return <span key={_opening.id}>{idx}. {_opening.hashedSecret}, {_opening.hashedChoice} </span>;
-                    })}
-                  </div>
-                  :
-                  null
+                    ?
+                    <div>
+                      {election.openings.map((_opening, idx) => {
+                        return <span key={_opening.id}>{idx}. {_opening.hashedSecret}, {_opening.hashedChoice} </span>;
+                      })}
+
+                    </div>
+                    :
+                    null
                 }
                 <br />
-                <Button color="success" disabled={election.state === "CLOSE" || election.state=== "COMMIT"} onClick={this.openingToggle}>{this.state.openingToggled?"關閉":"查看開票證明"}</Button>
+                <Button color="success" disabled={election.state === "CLOSE" || election.state === "COMMIT"} onClick={this.openingToggle}>{this.state.openingToggled ? "關閉" : "查看開票證明"}</Button>
               </div>
             </div>
           )

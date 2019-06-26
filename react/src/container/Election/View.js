@@ -84,7 +84,7 @@ class View extends React.Component {
           */
           return (
             <React.Fragment>
-              <h2 className="all-elections-title">All Elections</h2>
+              <h2 className="user-list-title">All Elections</h2>
               <div style={{
                 overflowX: 'scroll', height: '55vh', width: '60vw', display: 'flow',
                 textAlign: 'center'

@@ -3,7 +3,7 @@
 }
 
 .election-card{
-    display: block;
+    display: inline-block;
     margin: 15pt;
     width: 65vw;
     text-align: center;
@@ -13,7 +13,7 @@
     border-bottom: 1pt solid rgb(218, 212, 212);
     margin-bottom: 3pt;
     padding-bottom: 3pt;
-    width: 24em;
+    width: 30vw;
     text-align: left;
 }
 

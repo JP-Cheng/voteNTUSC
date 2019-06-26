@@ -76,8 +76,8 @@ class ElectionTabs extends React.Component {
         <TabContent activeTab={this.state.activeTab}>
           {[this.props.createdGeneralElections, this.props.votableGeneralElections, this.props.votedGeneralElections].map((elections, idx) => {
             return (
-              <div style={{ width: '100%', textAlign: 'center' }}>
-                <TabPane tabId={`${idx + 1}`} key={`${idx + 1}`}>
+              <TabPane tabId={`${idx + 1}`} key={`${idx + 1}`}>
+                <div style={{ width: '100%', textAlign: 'center' }}>
                   {elections.map(generalElection => {
                     const election = generalElection.type === "simpleElection" ? generalElection.simpleElection : generalElection.twoStageElection;
                     return <ElectionBlock
@@ -92,8 +92,9 @@ class ElectionTabs extends React.Component {
                       uid={this.props.uid}
                     />
                   })}
-                </TabPane>
-              </div>
+                </div>
+              </TabPane>
+
             )
           })}
         </TabContent>

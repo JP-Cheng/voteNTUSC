@@ -9,7 +9,8 @@ import {
   Alert,
   InputGroup,
   InputGroupAddon,
-  InputGroupText
+  InputGroupText,
+  Row, Col
 } from 'reactstrap'
 import { NavLink } from 'react-router-dom'
 
@@ -34,12 +35,13 @@ class CreateElection extends React.Component {
   constructor(props) {
     super(props);
     this.twoStage = false;
-    this.title =  null;
-    this.body = null ;
+    this.title = null;
+    this.body = null;
     this.open = false;
     this.users = [];
     this.state = {
-      choices: [""]
+      choices: [""],
+      users: []
     };
   }
 
@@ -65,8 +67,8 @@ class CreateElection extends React.Component {
     })
   }
   getId = data => {
-    if(!data.createGeneralElection) return;
-    if(data.createGeneralElection.type === "simpleElection") {
+    if (!data.createGeneralElection) return;
+    if (data.createGeneralElection.type === "simpleElection") {
       return data.createGeneralElection.simpleElection.id;
     }
     else return data.createGeneralElection.twoStageElection.id;
@@ -79,80 +81,106 @@ class CreateElection extends React.Component {
         {(createElection, { data, error }) => {
           return (
             <Form
-
               onSubmit={e => {
                 e.preventDefault();
                 let voters = this.users.filter(user => user.included);
                 voters = voters.map(voter => voter.id);
-                createElection({ variables: { type: this.twoStage?"twoStageElection":"simpleElection", title: this.title, body: this.body, choices: this.state.choices, open: this.open, voters: voters } })
+                createElection({ variables: { type: this.twoStage ? "twoStageElection" : "simpleElection", title: this.title, body: this.body, choices: this.state.choices, open: this.open, voters: voters } })
               }}
             >
-              
-              <br />
+              <h3 className="user-list-title">Launch an Election</h3>
+              <Row>
+                <Col>
+                  <FormGroup >
+                    <Label for="electionTitle" ><b>Title</b></Label>
+                    <Input type="text" name="name" required={true} id="electionTitle" defaultValue={this.title} onChange={e => { this.title = e.target.value }} />
+                  </FormGroup><br />
+                  <FormGroup>
+                    <Label for="electionBody"><b>Description</b></Label>
+                    <Input type="textarea" name="description" required={true} id="electionBody" defaultValue={this.body} onChange={e => { this.body = e.target.value }} />
+                  </FormGroup><br />
+                  <FormGroup>
+                    <Label><b>Choices</b></Label>
+                    <Choices choices={this.state.choices} changeHandler={this.handleChoiceInput} removeHandler={this.removeChoice} />
+                    <br />
+                    <Button color="secondary" onClick={this.addMoreChoice}>Add a new choice</Button>
+                    <br />
+                  </FormGroup>
+                </Col>
 
-              <FormGroup >
-                <Label for="electionTitle" >Title</Label>
-                <Input type="text" name="name" required={true} id="electionTitle" defaultValue={this.title} onChange={e => { this.title = e.target.value }} />
-              </FormGroup><br />
-              <FormGroup>
-                <Label for="electionBody">Description</Label>
-                <Input type="textarea" name="description" required={true} id="electionBody" defaultValue={this.body} onChange={e => { this.body = e.target.value }} />
-              </FormGroup><br />
-              <FormGroup>
-                <Label>Choices</Label>
-                <Choices choices={this.state.choices} changeHandler={this.handleChoiceInput} removeHandler={this.removeChoice} />
-                <br />
-                <Button color="secondary" onClick={this.addMoreChoice}>Add a new choice</Button>
-                <br />
-              </FormGroup><br />
-              <FormGroup check>
-                <Label check>
-                  <Input type="checkbox" onChange={e => {
-                    this.open = e.target.checked;
-                  }} />{' '}
-                  Start this election when created
-                </Label>
-              </FormGroup><br />
-              <FormGroup check>
-                <Label check>
-                  <Input type="checkbox" onChange={e => {
-                    this.twoStage = e.target.checked;
-                  }} />{' '}
-                  Create a two stage election
-                </Label>
-              </FormGroup><br />
-              <FormGroup>
-                <Label>Choose Voters</Label>
-                <Query query={USERS_QUERY}>
-                  {({ data, loading, error }) => {
-                    if (loading || !(data.users)) return <Label>Loading...</Label>;
-                    if (error) return <Alert color="danger">Loading User Error!</Alert>;
-                    if (this.users.length !== data.users.length) {
-                      this.users = data.users.map(user => ({ id: user.id, included: false }));
-                    }
-                    return data.users.map((user, idx) => {
-                      return (
-                        <InputGroup key={user.id}>
-                          <InputGroupAddon addonType="prepend">
-                            <InputGroupText>
-                              <Input addon type="checkbox" defaultChecked={this.users[idx].included} onChange={e => {
-                                this.users[idx].included = e.target.checked;
-                              }} />
-                            </InputGroupText>
-                          </InputGroupAddon>
-                          <Input value={`${user.name}, ${user.email}`} readOnly />
-                        </InputGroup>
-                      )
-                    })
-                  }}
-                </Query>
+                <Col>
+                  <FormGroup>
+                    <Label><b>Choose Voters</b></Label>
+                    <Query query={USERS_QUERY}>
+                      {({ data, loading, error }) => {
+                        if (loading || !(data.users)) return <Label>Loading...</Label>;
+                        if (error) return <Alert color="danger">Loading User Error!</Alert>;
+                        if (this.users.length !== data.users.length) {
+                          this.users = data.users.map(user => ({ id: user.id, included: false }));
+                        }
+                        return (<>
 
-              </FormGroup><br />
-              <Button type="submit" color="primary">
-                Create
-              </Button><br />
-              {error ? <Alert color="danger">Create Election Fail!</Alert> : null}
-              {(data && data.createGeneralElection) ? <Alert color="success">Create election success! <NavLink to={`/vote/${this.twoStage?"twoStage":"simple"}/${this.getId(data)}`}>View your election now!</NavLink></Alert> : null}
+                          <InputGroup>
+                            <InputGroupAddon addonType="prepend">
+                              <InputGroupText>
+                                <Input addon type="checkbox" defaultChecked={false} onChange={e => {
+                                  for (let i = 0; i < this.users.length; i++) {
+                                    this.users[i].included = e.target.checked;
+                                  }
+                                }} />
+                              </InputGroupText>
+                              <Input value={"Select All!"} readOnly />
+                            </InputGroupAddon>
+                          </InputGroup>
+
+                          {data.users.map((user, idx) => {
+                            return (
+                              <InputGroup key={user.id}>
+                                <InputGroupAddon addonType="prepend">
+                                  <InputGroupText>
+                                    <Input addon type="checkbox" defaultChecked={this.users[idx].included} onChange={e => {
+                                      this.users[idx].included = e.target.checked;
+
+                                    }} />
+                                  </InputGroupText>
+                                </InputGroupAddon>
+                                <Input value={`${user.name}, ${user.email}`} readOnly />
+                              </InputGroup>
+                            )
+                          })}
+                        </>)
+                      }}
+                    </Query>
+
+                  </FormGroup><br />
+                  <FormGroup check>
+                    <Label check>
+                      <Input type="checkbox" onChange={e => {
+                        this.open = e.target.checked;
+                      }} />{' '}
+                      Start this election when created
+                    </Label>
+                  </FormGroup>
+                  <FormGroup check>
+                    <Label check>
+                      <Input type="checkbox" onChange={e => {
+                        this.twoStage = e.target.checked;
+                      }} />{' '}
+                      Create a two stage election
+                    </Label>
+                  </FormGroup>
+                  <br />
+                  <Button type="submit" color="primary">
+                    Create
+                  </Button><br />
+                  {error ? <Alert color="danger">Create Election Fail!</Alert> : null}
+                  {(data && data.createGeneralElection)
+                    ? <Alert color="success">Create election success! <NavLink to={`/vote/${this.twoStage
+                      ? "twoStage"
+                      : "simple"}/${this.getId(data)}`}>View your election now!</NavLink></Alert>
+                    : null}
+                </Col>
+              </Row>
             </Form>
           )
         }}
