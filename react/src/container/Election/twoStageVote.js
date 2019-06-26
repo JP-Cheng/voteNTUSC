@@ -107,8 +107,8 @@ class twoStageVote extends React.Component {
     return (
       <Query query={TWO_STAGE_ELECTION_QUERY} variables={{ query: this.props.electionId }}>
         {({ data, loading, error, subscribeToMore }) => {
-          if (loading || !(data.twoStageElection)) return <h1>Loading...</h1>;
           if (error) return <h1>Error!</h1>;
+          if (loading || !(data.twoStageElection)) return <h1>Loading...</h1>;
           let election = data.twoStageElection;
           
           subscribeToMore({

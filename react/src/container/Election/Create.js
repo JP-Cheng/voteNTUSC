@@ -13,9 +13,7 @@ import {
   Row, Col
 } from 'reactstrap'
 import { NavLink } from 'react-router-dom'
-
 import { CREATE_GENERAL_ELECTION_MUTATION, USERS_QUERY } from '../../graphql'
-import { stat } from 'fs';
 
 const Choices = props => {
   return (
@@ -71,6 +69,14 @@ class CreateElection extends React.Component {
     if (this.state.choices.length === 1) return;
     this.setState(state => {
       state.choices.splice(idx, 1);
+      return state;
+    })
+  }
+  handleCheck = e => {
+    const idx = parseInt(e.target.id.substring(6));
+    const checked = e.target.checked;
+    this.setState(state => {
+      state.users[idx].included = checked;
       return state;
     })
   }
@@ -151,12 +157,10 @@ class CreateElection extends React.Component {
                           <InputGroup>
                             <InputGroupAddon addonType="prepend">
                               <InputGroupText>
-                                <Input addon type="checkbox" defaultChecked={false} onChange={e => {
+                                <Input addon type="checkbox" onChange={e => {
                                   const check = e.target.checked;
                                   this.setState(state => {
-                                    for (let i = 0; i < state.users.length; i++) {
-                                      state.users[i].included = !state.users[i].included;
-                                    }
+                                    state.users = state.users.map(user => ({ ...user, included: check}))
                                     return state;
                                   })
                                 }} />
@@ -171,14 +175,10 @@ class CreateElection extends React.Component {
                                 <InputGroupAddon addonType="prepend">
                                   <InputGroupText>
                                     <Input addon type="checkbox"
-                                      defaultChecked={this.state.users[idx].included}
-                                      onChange={e => {
-                                        // const check = e.target.checked;
-                                        this.setState(state => {
-                                          this.state.users[idx].included = !this.state.users[idx].included;
-                                          return state;
-                                        })
-                                      }} />
+                                      checked={this.state.users[idx].included}
+                                      id={`Check_${idx}`}
+                                      onChange={this.handleCheck} 
+                                    />
                                   </InputGroupText>
                                 </InputGroupAddon>
                                 <Input value={`${user.name}, ${user.email}`} readOnly />
