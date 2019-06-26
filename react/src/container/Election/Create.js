@@ -15,6 +15,7 @@ import {
 import { NavLink } from 'react-router-dom'
 
 import { CREATE_GENERAL_ELECTION_MUTATION, USERS_QUERY } from '../../graphql'
+import { stat } from 'fs';
 
 const Choices = props => {
   return (
@@ -22,8 +23,15 @@ const Choices = props => {
       {props.choices.map((choice, idx) => {
         return (
           <InputGroup key={`${idx}`}>
-            <Input type="text" name="choice" required={true} id={`${idx}`} value={choice} onChange={props.changeHandler} placeholder="Choice description..." />
-            <InputGroupAddon addonType="append"><Button id={`Button_${idx}`} onClick={props.removeHandler}>X</Button></InputGroupAddon>
+            <Input type="text" name="choice" required={true}
+              id={`${idx}`} value={choice}
+              onChange={props.changeHandler}
+              placeholder="Choice description..." />
+            <InputGroupAddon addonType="append">
+              <Button id={`Button_${idx}`}
+                onClick={props.removeHandler}>X
+              </Button>
+            </InputGroupAddon>
           </InputGroup>
         )
       })}
@@ -83,9 +91,18 @@ class CreateElection extends React.Component {
             <Form
               onSubmit={e => {
                 e.preventDefault();
-                let voters = this.users.filter(user => user.included);
+                let voters = this.state.users.filter(user => user.included);
                 voters = voters.map(voter => voter.id);
-                createElection({ variables: { type: this.twoStage ? "twoStageElection" : "simpleElection", title: this.title, body: this.body, choices: this.state.choices, open: this.open, voters: voters } })
+                createElection({
+                  variables: {
+                    type: this.twoStage
+                      ? "twoStageElection"
+                      : "simpleElection",
+                    title: this.title, body: this.body,
+                    choices: this.state.choices, open: this.open,
+                    voters: voters
+                  }
+                })
               }}
             >
               <h3 className="user-list-title">Launch an Election</h3>
@@ -93,15 +110,21 @@ class CreateElection extends React.Component {
                 <Col>
                   <FormGroup >
                     <Label for="electionTitle" ><b>Title</b></Label>
-                    <Input type="text" name="name" required={true} id="electionTitle" defaultValue={this.title} onChange={e => { this.title = e.target.value }} />
+                    <Input type="text" name="name" required={true}
+                      id="electionTitle" defaultValue={this.title}
+                      onChange={e => { this.title = e.target.value }} />
                   </FormGroup><br />
                   <FormGroup>
                     <Label for="electionBody"><b>Description</b></Label>
-                    <Input type="textarea" name="description" required={true} id="electionBody" defaultValue={this.body} onChange={e => { this.body = e.target.value }} />
+                    <Input type="textarea" name="description" required={true}
+                      id="electionBody" defaultValue={this.body}
+                      onChange={e => { this.body = e.target.value }} />
                   </FormGroup><br />
                   <FormGroup>
                     <Label><b>Choices</b></Label>
-                    <Choices choices={this.state.choices} changeHandler={this.handleChoiceInput} removeHandler={this.removeChoice} />
+                    <Choices choices={this.state.choices}
+                      changeHandler={this.handleChoiceInput}
+                      removeHandler={this.removeChoice} />
                     <br />
                     <Button color="secondary" onClick={this.addMoreChoice}>Add a new choice</Button>
                     <br />
@@ -115,8 +138,13 @@ class CreateElection extends React.Component {
                       {({ data, loading, error }) => {
                         if (loading || !(data.users)) return <Label>Loading...</Label>;
                         if (error) return <Alert color="danger">Loading User Error!</Alert>;
-                        if (this.users.length !== data.users.length) {
-                          this.users = data.users.map(user => ({ id: user.id, included: false }));
+                        if (this.state.users.length !== data.users.length) {
+                          this.setState(state => {
+                            state.users = data.users.map(user => ({
+                              id: user.id, included: false, name: user.name, email: user.email
+                            }));
+                            return state;
+                          })
                         }
                         return (<>
 
@@ -124,24 +152,33 @@ class CreateElection extends React.Component {
                             <InputGroupAddon addonType="prepend">
                               <InputGroupText>
                                 <Input addon type="checkbox" defaultChecked={false} onChange={e => {
-                                  for (let i = 0; i < this.users.length; i++) {
-                                    this.users[i].included = e.target.checked;
-                                  }
+                                  const check = e.target.checked;
+                                  this.setState(state => {
+                                    for (let i = 0; i < state.users.length; i++) {
+                                      state.users[i].included = !state.users[i].included;
+                                    }
+                                    return state;
+                                  })
                                 }} />
                               </InputGroupText>
                               <Input value={"Select All!"} readOnly />
                             </InputGroupAddon>
                           </InputGroup>
 
-                          {data.users.map((user, idx) => {
+                          {this.state.users.map((user, idx) => {
                             return (
                               <InputGroup key={user.id}>
                                 <InputGroupAddon addonType="prepend">
                                   <InputGroupText>
-                                    <Input addon type="checkbox" defaultChecked={this.users[idx].included} onChange={e => {
-                                      this.users[idx].included = e.target.checked;
-
-                                    }} />
+                                    <Input addon type="checkbox"
+                                      defaultChecked={this.state.users[idx].included}
+                                      onChange={e => {
+                                        // const check = e.target.checked;
+                                        this.setState(state => {
+                                          this.state.users[idx].included = !this.state.users[idx].included;
+                                          return state;
+                                        })
+                                      }} />
                                   </InputGroupText>
                                 </InputGroupAddon>
                                 <Input value={`${user.name}, ${user.email}`} readOnly />
@@ -175,9 +212,13 @@ class CreateElection extends React.Component {
                   </Button><br />
                   {error ? <Alert color="danger">Create Election Fail!</Alert> : null}
                   {(data && data.createGeneralElection)
-                    ? <Alert color="success">Create election success! <NavLink to={`/vote/${this.twoStage
-                      ? "twoStage"
-                      : "simple"}/${this.getId(data)}`}>View your election now!</NavLink></Alert>
+                    ? <Alert color="success">Create election success!
+                        <NavLink to={`/vote/${this.twoStage
+                        ? "twoStage"
+                        : "simple"}/${this.getId(data)}`}>
+                        View your election now!
+                        </NavLink>
+                    </Alert>
                     : null}
                 </Col>
               </Row>
