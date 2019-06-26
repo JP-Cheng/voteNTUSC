@@ -42,7 +42,7 @@ class Update extends React.Component {
           }
           else {
             if(this.props.state === "CLOSE") msg = "open the election";
-            else if(this.props.state === "COMMIT") msg = "stop election and start counting ballots";
+            else if(this.props.state === "COMMIT") msg = "stop the election and start counting ballots";
             else if(this.props.state === "OPEN") msg = "end the election";
             else msg = "make no change";
           }

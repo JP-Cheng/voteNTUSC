@@ -43,9 +43,11 @@ const Query = {
   },
   async election(parent, args, { db }, info) {
     console.log("Looking for Election:", args.electionId);
-    // Exec case insensitive LIKE query
     return await db.elections.findById(args.electionId)
-    .then(doc => {return doc;})
+    .then(doc => {
+      if(!doc) throw new Error("QueryElection Error: Election Not Found");
+      return doc;
+    })
     .catch(err => {throw err});
   },
   async twoStageElections(parent, args, { db }, info) {
@@ -65,7 +67,10 @@ const Query = {
   async twoStageElection(parent, args, { db }, info) {
     // Exec case insensitive LIKE query
     return await db.twoStageElections.findById(args.query)
-    .then(doc => doc)
+    .then(doc => {
+      if(!doc) throw new Error("QueryTwoStageElection Error: Election Not Found");
+      return doc;
+    })
     .catch(err => {throw err});
   },
   async allElections(parent, args, { db }, info) {

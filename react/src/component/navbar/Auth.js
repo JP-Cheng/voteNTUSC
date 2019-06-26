@@ -29,7 +29,6 @@ const loggedIn = () => {
         {({data, error, refetch}) => {
           _refetch = refetch;
           if(error) {
-            console.error(error);
             return notLoggedIn;
           }
           const name = (data&&data.me)?data.me.name:"";

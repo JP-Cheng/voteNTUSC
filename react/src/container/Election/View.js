@@ -5,8 +5,21 @@ import {
   CardTitle, CardSubtitle, Button
 } from 'reactstrap'
 import { Link } from 'react-router-dom'
-import { ALL_ELECTIONS_QUERY, ELECTION_SUBSCRIPTION } from '../../graphql/index'
+import { ALL_ELECTIONS_QUERY, ALL_ELECTIONS_SUBSCRIPTION } from '../../graphql/index'
 import './Vote.css'
+
+const findGeneral = (generalElections, element) => {
+  let id = element;
+  if(typeof element !== 'string') {
+    if(element.simpleElection) id = element.simpleElection.id;
+    else id = element.twoStageElection.id;
+  }
+  return generalElections.findIndex(generalElection => {
+    const simple = generalElection.type === "simpleElection";
+    const generalId = simple?generalElection.simpleElection.id:generalElection.twoStageElection.id;
+    return generalId === id;
+  })
+}
 
 const electionBlock = ({ id, type, title, body, creator }) => {
   return (
@@ -53,35 +66,24 @@ class View extends React.Component {
             console.error(error);
             return <h1>Something went wrong...</h1>;
           }
-          /*
+
           subscribeToMore({
-            document: ELECTION_SUBSCRIPTION,
+            document: ALL_ELECTIONS_SUBSCRIPTION,
             updateQuery: (prev, { subscriptionData }) => {
               if (!(subscriptionData.data)) return prev;
-              else if (subscriptionData.data.elections.mutation === 'CREATED') {
-                if (prev.elections.findIndex(election => {
-                  return election.id === subscriptionData.data.elections.data.id;
-                }) !== -1) return prev;
-                else prev.elections.push(subscriptionData.data.elections.data);
+              else if (subscriptionData.data.allElections.mutation === 'CREATED') {
+                if(findGeneral(prev.allElections, subscriptionData.data.allElections.electionId) !== -1) return prev;
+                else prev.allElections.push(subscriptionData.data.allElections);
                 return prev;
               }
-              else if (subscriptionData.data.elections.mutation === 'UPDATED') {
-                const idx = prev.elections.findIndex(election => {
-                  return election.id === subscriptionData.data.elections.data.id;
-                })
-                if (idx !== -1) prev.elections[idx] = subscriptionData.data.elections.data;
-                return prev
-              }
-              else if (subscriptionData.data.elections.mutation === 'DELETED') {
-                const idx = prev.elections.findIndex(election => {
-                  return election.id === subscriptionData.data.elections.electionId;
-                })
-                if (idx !== -1) prev.elections.splice(idx, 1);
+              else if (subscriptionData.data.allElections.mutation === 'DELETED') {
+                const idx = findGeneral(prev.allElections, subscriptionData.data.allElections.electionId);
+                if (idx !== -1) prev.allElections.splice(idx, 1);
                 return prev;
               }
             }
           })
-          */
+          
           return (
             <React.Fragment>
               <h2 className="user-list-title">All Elections</h2>

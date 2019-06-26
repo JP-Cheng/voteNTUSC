@@ -122,26 +122,20 @@ const Mutation = {
     .catch(err => {throw err;});
 
     election.creator = creator.toObject();
-    if(simple){
-      pubsub.publish('election', {
-        elections: {
-          mutation: 'CREATED',
-          electionId: election._id,
-          data: election
-        }
-      })
-      return {type: "simpleElection", simpleElection: election};
-    }
-    else {
-      pubsub.publish('twoStageElection', {
-        twoStageElections: {
-          mutation: 'CREATED',
-          electionId: election._id,
-          data: election
-        }
-      })
-      return {type: "twoStageElection", twoStageElection: election};
-    }
+    pubsub.publish('allElections', {
+      allElections: {
+        mutation: 'CREATED',
+        type: simple?"simpleElection":"twoStageElectoin",
+        electionId: election._id,
+        twoStageElection: simple?null:election,
+        simpleElection: simple?election:null
+      }
+    })
+    return ({
+      type: simple?"simpleElection":"twoStageElectoin",
+      twoStageElection: simple?null:election,
+      simpleElection: simple?election:null
+    })
   },
   async createElection(parent, args, { me, db, pubsub, req }, info) {
     console.log("Creating Election...")
@@ -164,11 +158,12 @@ const Mutation = {
     .catch(err => {throw err;});
 
     election.creator = creator.toObject();
-    pubsub.publish('election', {
-      elections: {
+    pubsub.publish('allElections', {
+      allElections: {
         mutation: 'CREATED',
+        type: "simpleElection",
         electionId: election._id,
-        data: election
+        simpleElection: election
       }
     })
     
@@ -194,11 +189,18 @@ const Mutation = {
     election.open = !election.open;
 
     await election.save();
-    pubsub.publish('election', {
-      elections: {
+    pubsub.publish(`election ${id}`, {
+      election: {
         mutation: 'UPDATED',
-        electionId: election._id,
         data: election.toObject()
+      }
+    })
+    pubsub.publish('allElections', {
+      allElections: {
+        mutation: 'UPDATED',
+        type: "simpleElection",
+        electionId: id,
+        simpleElection: election.toObject()
       }
     })
     return election.toObject();
@@ -226,11 +228,12 @@ const Mutation = {
 
     election.creator = creator.toObject();
     
-    pubsub.publish('twoStageElection', {
-      twoStageElections: {
+    pubsub.publish('allElections', {
+      allElections: {
         mutation: 'CREATED',
+        type: "twoStageElection",
         electionId: election._id,
-        data: election
+        twoStageElection: election
       }
     })
     
@@ -259,11 +262,18 @@ const Mutation = {
     else if(state === "OPEN") election.state = "END";
     await election.save();
     
-    pubsub.publish('twoStageElection', {
-      elections: {
+    pubsub.publish(`twoStageElection ${id}`, {
+      twoStageElection: {
         mutation: 'UPDATED',
-        electionId: election._id,
         data: election.toObject()
+      }
+    })
+    pubsub.publish('allElections', {
+      allElections: {
+        mutation: 'UPDATED',
+        type: "twoStageElection",
+        electionId: id,
+        twoStageElection: election.toObject()
       }
     })
     
@@ -294,17 +304,19 @@ const Mutation = {
     election.markModified('voted');
     await election.save()
     .catch(err => {throw err});
-    pubsub.publish(`ballot ${election._id}`, {
-      ballots: {
-        mutation: 'CREATED',
-        data: newBallot.toObject()
+    
+    pubsub.publish(`election ${electionId}`, {
+      election: {
+        mutation: 'UPDATED',
+        data: election.toObject()
       }
     })
-    pubsub.publish('election', {
-      elections: {
+    pubsub.publish('allElections', {
+      allElections: {
         mutation: 'UPDATED',
-        electionId: election._id,
-        data: election.toObject()
+        type: "simpleElection",
+        electionId: electionId,
+        simpleElection: election.toObject()
       }
     })
 
@@ -341,17 +353,19 @@ const Mutation = {
     await election.save()
     .catch(err => {throw err});
     
-    pubsub.publish(`commitment ${election._id}`, {
-      commitments: {
-        mutation: 'CREATED',
-        data: newCommitment.toObject()
+    pubsub.publish(`twoStageElection ${election._id}`, {
+      twoStageElection: {
+        mutation: 'UPDATED',
+        data: election.toObject()
       }
     })
-    pubsub.publish('election', {
-      elections: {
+
+    pubsub.publish('allElections', {
+      allElections: {
         mutation: 'UPDATED',
-        electionId: election._id,
-        data: election.toObject()
+        type: "twoStageElection",
+        electionId: twoStageElectionId,
+        simpleElection: election.toObject()
       }
     })
 
@@ -388,22 +402,9 @@ const Mutation = {
     await newBallot.save()
     .catch(err => {throw err});
 
-    pubsub.publish(`opening ${election._id}`, {
-      openings: {
-        mutation: 'CREATED',
-        data: newOpening.toObject()
-      }
-    })
-    pubsub.publish(`ballot ${election._id}`, {
-      openings: {
-        mutation: 'CREATED',
-        data: newBallot.toObject()
-      }
-    })
-    pubsub.publish('election', {
-      elections: {
+    pubsub.publish(`twoStageElection ${election._id}`, {
+      twoStageElection: {
         mutation: 'UPDATED',
-        electionId: election._id,
         data: election.toObject()
       }
     })

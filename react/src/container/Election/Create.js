@@ -212,7 +212,7 @@ class CreateElection extends React.Component {
                   </Button><br />
                   {error ? <Alert color="danger">Create Election Fail!</Alert> : null}
                   {(data && data.createGeneralElection)
-                    ? <Alert color="success">Create election success!
+                    ? <Alert color="success">Create election success! <br />
                         <NavLink to={`/vote/${this.twoStage
                         ? "twoStage"
                         : "simple"}/${this.getId(data)}`}>

@@ -33,11 +33,9 @@ type Mutation {
 }
 
 type Subscription {
-  ballots(electionId: ID!): BallotsSubscriptionPayload!
-  commitments(electionId: ID!): CommitmentsSubscriptionPayload!
-  openings(electionId: ID!): OpeningsSubscriptionPayload!
-  elections: ElectionsSubscriptionPayload!
-  twoStageElections: TwoStageElectionsSubscriptionPayload!
+  election(electionId: ID!): ElectionPayload!
+  twoStageElection(electionId: ID!): TwoStageElectionPayload!
+  allElections: GeneralElectionPayload!
 }
 
 input CreateGeneralElectionInput {
@@ -165,29 +163,20 @@ enum MutationType {
   DELETED
 }
 
-type ElectionsSubscriptionPayload {
+type ElectionPayload {
   mutation: MutationType!
-  electionId: ID!
   data: Election
 }
 
-type TwoStageElectionsSubscriptionPayload {
+type TwoStageElectionPayload {
   mutation: MutationType!
-  electionId: ID!
   data: TwoStageElection
 }
 
-type CommitmentsSubscriptionPayload {
+type GeneralElectionPayload {
   mutation: MutationType!
-  data: Commitment!
-}
-
-type OpeningsSubscriptionPayload {
-  mutation: MutationType!
-  data: Opening!
-}
-
-type BallotsSubscriptionPayload {
-  mutation: MutationType!
-  data: Ballot!
+  type: String!
+  electionId: ID!
+  twoStageElection: TwoStageElection
+  simpleElection: Election
 }

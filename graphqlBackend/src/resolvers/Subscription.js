@@ -1,51 +1,29 @@
 const Subscription = {
-  ballots: {
-    async subscribe(parent, { electionId }, { db, pubsub }, info) {
-      const election = await db.elections.findById(electionId)
-      .then(election => election )
-      .catch(err => {throw err});
-
-      if(!election) {
-        await db.twoStageElections.findById(electionId)
-        .then(election => {
-          if(!election) throw new Error("BallotsSbscription Error: Election Not Found");
-        })
-        .catch(err => {throw err});
-      }
-
-      return pubsub.asyncIterator(`ballot ${electionId}`)
-    }
-  },
-  commitments: {
+  election: {
     async subscribe(parent, { electionId }, { db, pubsub }, info) {
       await db.elections.findById(electionId)
       .then(election => {
-          if(!election) throw new Error("election not found")
+        if(!election) throw new Error("SubscribeElection Error: Election Not Found");
+        else return election;
       })
       .catch(err => {throw err});
-
-      return pubsub.asyncIterator(`commitment ${electionId}`)
+      return pubsub.asyncIterator(`election ${electionId}`)
     }
   },
-  openings: {
+  twoStageElection: {
     async subscribe(parent, { electionId }, { db, pubsub }, info) {
-      await db.elections.findById(electionId)
+      await db.twoStageElections.findById(electionId)
       .then(election => {
-          if(!election) throw new Error("election not found")
+        if(!election) throw new Error("SubscribeTwoStageElection Error: Election Not Found");
+        else return election;
       })
       .catch(err => {throw err});
-
-      return pubsub.asyncIterator(`opening ${electionId}`)
+      return pubsub.asyncIterator(`twoStageElection ${electionId}`)
     }
   },
-  elections: {
+  allElections: {
     subscribe(parent, args, { pubsub }, info) {
-      return pubsub.asyncIterator('election')
-    }
-  },
-  twoStageElections: {
-    subscribe(parent, args, { pubsub }, info) {
-      return pubsub.asyncIterator('twoStageElection')
+      return pubsub.asyncIterator('allElections')
     }
   }
 }

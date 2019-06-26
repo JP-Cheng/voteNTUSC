@@ -1,6 +1,6 @@
 import React from 'react'
 import { Query, Mutation } from 'react-apollo'
-import { ELECTION_QUERY, BALLOTS_SUBSCRIPTION, CREATE_BALLOT_MUTATION } from '../../graphql/index'
+import { ELECTION_QUERY, ELECTION_SUBSCRIPTION, CREATE_BALLOT_MUTATION } from '../../graphql/index'
 import { Button, Alert } from 'reactstrap'
 import './Vote.css'
 
@@ -52,7 +52,8 @@ class Vote extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      toggled: false
+      toggled: false,
+      alert: false
     }
   }
 
@@ -71,22 +72,25 @@ class Vote extends React.Component {
     return (
       <Query query={ELECTION_QUERY} variables={{ electionId: this.props.electionId }}>
         {({ data, loading, error, subscribeToMore }) => {
+          if (error) return <h1>Election Not Found</h1>;
           if (loading || !(data.election)) return <h1>Loading...</h1>;
-          if (error) return <h1>Error!</h1>;
+          
           subscribeToMore({
-            document: BALLOTS_SUBSCRIPTION,
+            document: ELECTION_SUBSCRIPTION,
             variables: { electionId: data.election.id },
             updateQuery: (prev, { subscriptionData }) => {
-              if (!(subscriptionData.data) || subscriptionData.data.ballots.mutation !== 'CREATED') return prev;
-              else {
-                if (data.election.ballots.findIndex(ballot => {
-                  return ballot.id === subscriptionData.data.ballots.data.id;
-                }) !== -1) return prev;
-                prev.election.ballots.push(subscriptionData.data.ballots.data);
+              if (!(subscriptionData.data) || !(subscriptionData.data.election.mutation)) return prev;
+              if(subscriptionData.data.election.mutation === "DELETED") {
+                this.setState(state => {
+                  state.alert = true;
+                  return state;
+                })
                 return prev;
               }
+              else return {election: subscriptionData.data.election.data};
             }
           })
+
           let votable = false, text;
           if (!data.election.open) {
             text = "投票關閉中";
@@ -135,10 +139,10 @@ class Vote extends React.Component {
                     ?
                     <VoteForm voted={data.election.voted} choices={data.election.choices} electionId={this.props.electionId} />
                     :
-                    null
+                    <Button color="primary" disabled={!votable} onClick={this.toggle}>{this.state.toggled ? "返回" : text}</Button>
                 }
                 <br />
-                <Button color="primary" disabled={!votable} onClick={this.toggle}>{this.state.toggled ? "返回" : text}</Button>
+                {this.state.alert?<Alert color="dnager">This election has been deleted!</Alert>:null}
               </div>
             </div>
           )

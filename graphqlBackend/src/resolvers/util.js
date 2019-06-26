@@ -75,11 +75,18 @@ const _deleteElection = async (id, db, pubsub) => {
   .catch(err => {throw err});
   await electionBallots.map(ballot => _deleteBallot(ballot._id, db));
 
-  pubsub.publish('election', {
-    elections: {
+  pubsub.publish('allElections', {
+    allElections: {
       mutation: 'DELETED',
+      type: "simpleElection",
       electionId: id,
-      data: null
+      simpleElection: null
+    }
+  })
+
+  pubsub.publish(`election ${id}`, {
+    election: {
+      mutation: 'DELETED',
     }
   })
 
@@ -110,11 +117,17 @@ const _deleteTwoStageElection = async (id, db, pubsub) => {
   await electionOpenings.map(opening => _deleteOpening(opening._id, db));
 
   
-  pubsub.publish('twoStageElection', {
-    elections: {
+  pubsub.publish('allElections', {
+    allElections: {
       mutation: 'DELETED',
-      electionId: id,
-      data: null
+      type: "twoStageElection",
+      electionId: id
+    }
+  })
+
+  pubsub.publish(`twoStageElection ${id}`, {
+    twoStageElection: {
+      mutation: 'DELETED'
     }
   })
   
