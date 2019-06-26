@@ -30,6 +30,7 @@ class VoteForm extends React.Component {
 
           return (
             <div className="election-ballot">
+              <br />
               投下神聖的一票：<br />
               {this.props.choices.map((choice, idx) => {
                 return (<>
@@ -87,16 +88,16 @@ class Vote extends React.Component {
             }
           })
           let votable = false, text;
-          if(!data.election.open) {
+          if (!data.election.open) {
             text = "投票關閉中";
           }
-          else if(!localStorage.uid) {
+          else if (!localStorage.uid) {
             text = "請先登入";
           }
-          else if(!this.isVoter(data.election.voters)) {
+          else if (!this.isVoter(data.election.voters)) {
             text = "您不是選民";
           }
-          else if(this.isVoted(data.election.voted)) {
+          else if (this.isVoted(data.election.voted)) {
             text = "已投票";
           }
           else {
@@ -131,13 +132,13 @@ class Vote extends React.Component {
                 </div><br />
                 {
                   this.state.toggled
-                  ?
-                  <VoteForm voted={data.election.voted} choices={data.election.choices} electionId={this.props.electionId} />                  
-                  :
-                  null
+                    ?
+                    <VoteForm voted={data.election.voted} choices={data.election.choices} electionId={this.props.electionId} />
+                    :
+                    null
                 }
                 <br />
-                <Button color="primary" disabled={!votable} onClick={this.toggle}>{this.state.toggled? "返回" : text}</Button>
+                <Button color="primary" disabled={!votable} onClick={this.toggle}>{this.state.toggled ? "返回" : text}</Button>
               </div>
             </div>
           )

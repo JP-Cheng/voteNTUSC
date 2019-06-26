@@ -21,6 +21,7 @@ const ElectionBlock = ({ id, type, title, body, creator, open, state, uid }) => 
         </CardSubtitle>
         <CardText>
           Description: {(body.length > 9) ? (body.substring(0, 7) + '...') : (body)}
+          <br />
           <i style={{ color: 'gray' }}>{type}</i>
         </CardText>
         {localStorage['uid'] === creator.id && localStorage['uid'] === uid ?

@@ -87,7 +87,7 @@ class View extends React.Component {
               <h2 className="all-elections-title">All Elections</h2>
               <div style={{
                 overflowX: 'scroll', height: '55vh', width: '60vw', display: 'flow',
-                textAlign: 'left'
+                textAlign: 'center'
               }}>
                 {data.allElections.map(election => {
                   if (election.type === "simpleElection") return electionBlock({ type: election.type, ...election.simpleElection });
