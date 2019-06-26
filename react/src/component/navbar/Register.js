@@ -12,6 +12,14 @@ import { NavLink } from 'react-router-dom'
 import classes from './Auth.module.css'
 import { REGISTER_MUTATION } from '../../graphql'
 
+const errHandler = error => {
+  if(error && error.message) {
+    const msg = error.message;
+    if(msg.search("Email Taken") !== -1) return "Email already registered!";
+  }
+  return "Register failed!"
+}
+
 const RegisterForm = props => {
   let email, pwd, name;
   return (
@@ -50,7 +58,7 @@ const RegisterForm = props => {
               : null}
             <br />
             <br />
-            {error ? <Alert color="danger">Register Fail!</Alert> : null}
+            {error ? <Alert color="danger">{errHandler(error)}</Alert> : null}
           </Form>
         )
       }}

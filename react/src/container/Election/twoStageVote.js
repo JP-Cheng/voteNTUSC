@@ -1,5 +1,6 @@
 import React from 'react'
 import { Query, Mutation } from 'react-apollo'
+import { Link } from 'react-router-dom'
 import { Button, Alert } from 'reactstrap'
 import { TWO_STAGE_ELECTION_QUERY, CREATE_COMMITMENT_MUTATION, CREATE_OPENING_MUTATION, TWO_STAGE_ELECTION_SUBSCRIPTION } from '../../graphql/index'
 import { myHash } from '../../hash'
@@ -72,7 +73,6 @@ class twoStageVote extends React.Component {
     this.state = {
       toggled: false,
       commitmentToggled: false,
-      openingsToggled: false,
       alert: false
     }
   }
@@ -87,13 +87,6 @@ class twoStageVote extends React.Component {
   commitmentToggle = _ => {
     this.setState(state => {
       state.commitmentToggled = !state.commitmentToggled;
-      return state;
-    })
-  }
-
-  openingToggle = _ => {
-    this.setState(state => {
-      state.openingToggled = !state.openingToggled;
       return state;
     })
   }
@@ -136,7 +129,7 @@ class twoStageVote extends React.Component {
           }
           else if (election.state === "END") {
             votable = false;
-            text = "投票已結束";
+            text = "已結束";
           }
           else if (!localStorage.uid && election.state === "OPEN") {
             votable = true;
@@ -181,18 +174,19 @@ class twoStageVote extends React.Component {
                   <div className="aChoice">{`${election.choices.length + 1}. 廢票 (${countVote(-1, election.ballots)})`}</div>
                 </div><br /><br />
                 <div className="election-info">
-                  已有<em>{election.voted.length}/{election.voters.length}</em>人投下選票<br /><br />
+                  已有<em>{election.voted.length}/{election.voters.length}</em>人投下選票<br />
                   已有<em>{election.openings.length}/{election.commitments.length}</em>張選票開出<br /><br />
+                  投票{(election.state === "END" || election.state === "CLOSE")?text:"進行中"}
                 </div><br />
                 {
                   this.state.toggled
                     ?
                     <VoteForm stage={election.state} choices={election.choices} electionId={this.props.electionId} />
                     :
-                    <Button color="primary" disabled={!votable} onClick={this.toggle}>{text}</Button>
+                    (election.state === "END" || election.state === "CLOSE")?null:<Button color="primary" style={{marginBottom: '0.5em'}} disabled={!votable} onClick={this.toggle}>{text}</Button>
                 }
                 <br />
-                <Button color="info" disabled={election.state === "CLOSE"} onClick={this.commitmentToggle}>
+                <Button style={{marginBottom: '0.5em'}} color="info" disabled={election.state === "CLOSE"} onClick={this.commitmentToggle}>
                   {this.state.commitmentToggled ? "關閉" : "查看選票"}
                 </Button>
                 {
@@ -210,24 +204,11 @@ class twoStageVote extends React.Component {
                     null
                 }
                 <br />
-                <Button color="success" disabled={election.state === "CLOSE" || election.state === "COMMIT"}
-                  onClick={this.openingToggle}>
-                  {this.state.openingToggled ? "關閉" : "查看開票證明"}
-                </Button>
-                {
-                  this.state.openingToggled
-                    ?
-                    <div style={{ wordBreak: 'break-word', width: '40vw' }}>
-                      {election.openings.map((_opening, idx) => {
-                        return (
-                          <>
-                            <span key={_opening.id}>{idx + 1}. {_opening.hashedSecret}, {_opening.hashedChoice} </span>
-                            <br />
-                          </>);
-                      })}
-                    </div>
-                    :
-                    null
+                {(election.state === "CLOSE" || election.state === "COMMIT")?
+                  null:
+                  <Link to={`/verify/${this.props.electionId}`}>
+                    <Button color="success">驗票</Button>
+                  </Link>
                 }
                 <br />
                 {this.state.alert?<Alert color="danger">This election has been deleted!</Alert>:null}

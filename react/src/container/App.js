@@ -8,7 +8,7 @@ import Register from '../component/navbar/Register'
 import Login from '../component/navbar/Login'
 import './App.css';
 import Navbar from '../component/navbar'
-import { View, Vote, TwoStageVote, Create } from './Election'
+import { View, Vote, TwoStageVote, Create, Verify } from './Election'
 import { AllUser, Profile } from './User'
 
 const Div = styled.div`
@@ -30,6 +30,7 @@ class App extends React.Component {
               <Route exact path="/vote"><View /></Route>
               <Route path="/vote/simple/:id">{({ match }) => <Vote electionId={match.params.id} />}</Route>
               <Route path="/vote/twoStage/:id">{({ match }) => <TwoStageVote electionId={match.params.id} />}</Route>
+              <Route path="/verify/:id">{({ match }) => <Verify electionId={match.params.id} />}</Route>
               <Route exact path="/login"><Login /></Route>
               <Route exact path="/register"><Register /></Route>
               <Route exact path="/create"><Create new={true} /></Route>

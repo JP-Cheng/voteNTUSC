@@ -132,14 +132,14 @@ class Vote extends React.Component {
                 </div><br /><br />
                 <div className="election-info">
                   已有<em>{data.election.ballots.length}/{data.election.voters.length}</em>人投下選票<br /><br />
-
+                  投票{!data.election.open?"關閉":"進行"}中<br />
                 </div><br />
                 {
                   this.state.toggled
                     ?
                     <VoteForm voted={data.election.voted} choices={data.election.choices} electionId={this.props.electionId} />
                     :
-                    <Button color="primary" disabled={!votable} onClick={this.toggle}>{this.state.toggled ? "返回" : text}</Button>
+                    (!data.election.open) ? null : <Button color="primary" disabled={!votable} onClick={this.toggle}>{this.state.toggled ? "返回" : text}</Button>
                 }
                 <br />
                 {this.state.alert?<Alert color="dnager">This election has been deleted!</Alert>:null}

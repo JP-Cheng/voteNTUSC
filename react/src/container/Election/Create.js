@@ -37,6 +37,15 @@ const Choices = props => {
   )
 }
 
+const errHandler = error => {
+  if(error && error.message) {
+    const msg = error.message;
+    if(msg.search("Title Already Exist") !== -1) return "Some election already used this title!";
+    if(msg.search("Not Login") !== -1) return "Please login first!";
+  }
+  return "Create Election Fail!";
+}
+
 class CreateElection extends React.Component {
   constructor(props) {
     super(props);
@@ -210,7 +219,7 @@ class CreateElection extends React.Component {
                   <Button type="submit" color="primary">
                     Create
                   </Button><br />
-                  {error ? <Alert color="danger">Create Election Fail!</Alert> : null}
+                  {error ? <Alert color="danger">{errHandler(error)}</Alert> : null}
                   {(data && data.createGeneralElection)
                     ? <Alert color="success">Create election success! <br />
                         <NavLink to={`/vote/${this.twoStage

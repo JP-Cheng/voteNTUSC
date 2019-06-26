@@ -12,6 +12,15 @@ import { Redirect } from 'react-router-dom'
 import classes from './Auth.module.css'
 import { LOGIN_MUTATION } from '../../graphql'
 
+const errHandler = error => {
+  if(error && error.message) {
+    const msg = error.message;
+    if(msg.search("Invalid password") !== -1) return "Wrong password!";
+    if(msg.search("Invalid email") !== -1) return "Wrong email!";
+  }
+  return "Login failed!"
+}
+
 class LoginForm extends React.Component {
   render() {
     let email, pwd;
@@ -46,7 +55,7 @@ class LoginForm extends React.Component {
               </Button>
               <br />
               <br />
-              {error ? <Alert color="danger">Login Fail!</Alert> : null}
+              {error ? <Alert color="danger">{errHandler(error)}</Alert> : null}
             </Form>
           )
         }}
