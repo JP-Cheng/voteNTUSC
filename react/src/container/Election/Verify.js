@@ -1,7 +1,7 @@
 import React from 'react'
 import { Query } from 'react-apollo'
 import { Link } from 'react-router-dom'
-import { Col, Row, Container, Button, Form, FormGroup, Label, Input, InputGroup, InputGroupAddon } from 'reactstrap'
+import { Col, Row, Container, Button, Form, FormGroup, Label, Input, InputGroup, InputGroupAddon, Spinner } from 'reactstrap'
 import { TWO_STAGE_ELECTION_QUERY, TWO_STAGE_ELECTION_SUBSCRIPTION } from '../../graphql/index'
 import { myHash } from '../../hash'
 
@@ -29,7 +29,7 @@ class Verify extends React.Component {
       <Query query={TWO_STAGE_ELECTION_QUERY} variables={{ query: this.props.electionId }}>
         {({ data, loading, error, subscribeToMore }) => {
           if (error) return <h1>Error!</h1>;
-          if (loading || !(data.twoStageElection)) return <h1>Loading...</h1>;
+          if (loading || !(data.twoStageElection)) return <Spinner color="primary" />;
 
           subscribeToMore({
             document: TWO_STAGE_ELECTION_SUBSCRIPTION,

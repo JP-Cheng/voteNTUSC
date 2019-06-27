@@ -1,7 +1,7 @@
 import React from 'react'
 import { Query, Mutation } from 'react-apollo'
 import { ELECTION_QUERY, ELECTION_SUBSCRIPTION, CREATE_BALLOT_MUTATION } from '../../graphql/index'
-import { Button, Alert } from 'reactstrap'
+import { Button, Alert, Spinner } from 'reactstrap'
 import { Update, Delete } from '.'
 import './Vote.css'
 
@@ -74,7 +74,7 @@ class Vote extends React.Component {
       <Query query={ELECTION_QUERY} variables={{ electionId: this.props.electionId }}>
         {({ data, loading, error, subscribeToMore }) => {
           if (error) return <h1>Election Not Found</h1>;
-          if (loading || !(data.election)) return <h1>Loading...</h1>;
+          if (loading || !(data.election)) return <Spinner color="primary" />;
 
           subscribeToMore({
             document: ELECTION_SUBSCRIPTION,

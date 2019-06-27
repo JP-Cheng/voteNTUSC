@@ -1,8 +1,7 @@
 import React from 'react'
 import { Query } from 'react-apollo'
 import {
-  Alert, Card, CardGroup,
-  CardTitle
+  Alert, Card, CardGroup, CardTitle, Spinner
 } from 'reactstrap'
 import { NavLink } from 'react-router-dom'
 import { USERS_QUERY } from '../../graphql'
@@ -14,7 +13,7 @@ const AllUser = () => {
       <h2 className="user-list-title">All Users</h2>
       <Query query={USERS_QUERY}>
         {({ data, loading, error }) => {
-          if (loading || !(data.users)) return <h1>Loading...</h1>;
+          if (loading || !(data.users)) return <Spinner color="primary" />;
           if (error) return <Alert color="danger">Loading User Error!</Alert>;
           return (
             <CardGroup>
