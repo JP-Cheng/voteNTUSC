@@ -34,7 +34,7 @@ class Update extends React.Component {
           if (error) console.error(error);
 
           let msg = "";
-          let btn = "";
+          let btn = "投票已結束";
           if (simple) {
             if (this.props.open) {
               msg = "close the election";
@@ -50,7 +50,7 @@ class Update extends React.Component {
 
           return (
             <div>
-              <Button color="info" onClick={this.toggle}>{simple ? (this.props.open ? "Close" : "Open") : `${btn}`}</Button>
+              <Button color="info" onClick={this.toggle} disabled={this.props.state === "END"} >{simple ? (this.props.open ? "Close" : "Open") : `${btn}`}</Button>
               <Modal isOpen={this.state.modal} toggle={this.toggle}>
                 <ModalHeader toggle={this.toggle}>Wait!</ModalHeader>
                 <ModalBody>

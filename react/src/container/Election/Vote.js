@@ -154,7 +154,7 @@ class Vote extends React.Component {
                         <Update electionId={data.election.id} type="simpleElection" open={data.election.open} state={data.election.state} />
                         {/* the div below is for UI setting */}
                         <div style={{ height: '0.4em', display: 'block' }} ></div>
-                        <Delete electionId={data.election.id} type={data.election.type} />
+                        <Delete electionId={data.election.id} type="simpleElection" />
                       </React.Fragment>
                     ) :
                     null
