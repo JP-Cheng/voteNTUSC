@@ -18,7 +18,7 @@ class Verify extends React.Component {
     const text = e.target.value;
     this.setText(text);
   }
-  setText = text => {this.setState(state => ({ ...state, input: text, output: text !== "" ? myHash(text) : "" }))};
+  setText = text => { this.setState(state => ({ ...state, input: text, output: text !== "" ? myHash(text) : "" })) };
   findCommitment = (commitment, commitments) => {
     return commitments.findIndex(_commitment => commitment === _commitment.commitment);
   }
@@ -44,13 +44,13 @@ class Verify extends React.Component {
                 return prev;
               }
               else {
-                return {twoStageElection: subscriptionData.data.twoStageElection.data};
+                return { twoStageElection: subscriptionData.data.twoStageElection.data };
               }
             }
           })
 
           const hashedChoices = {};
-          for(let i = -1; i < data.twoStageElection.choices.length; i++) hashedChoices[myHash(i.toString())] = i;
+          for (let i = -1; i < data.twoStageElection.choices.length; i++) hashedChoices[myHash(i.toString())] = i;
 
           return (
             <Container>
@@ -60,20 +60,20 @@ class Verify extends React.Component {
                   {data.twoStageElection.openings.map(({ hashedChoice, hashedSecret, id }) => {
                     let choice = hashedChoices[hashedChoice];
                     const numChoice = choice;
-                    choice = choice === -1?"?":choice.toString();
+                    choice = choice === -1 ? "?" : choice.toString();
                     const ballotIdx = this.findCommitment(myHash(`${hashedSecret}${hashedChoice}`), data.twoStageElection.commitments);
                     return (
-                      <Form key={id} style={{border: "2px #CCC solid", borderRadius: '2px', padding: '1em', marginBottom: '2em'}}>
+                      <Form key={id} style={{ border: "2px #CCC solid", borderRadius: '2px', padding: '1em', marginBottom: '2em' }}>
                         <Label>投下的選項</Label><br />
-                        <InputGroup style={{cursor: "pointer", marginBottom: "0.6em"}} onClick={_ => {this.setText(choice)}}>
+                        <InputGroup style={{ cursor: "pointer", marginBottom: "0.6em" }} onClick={_ => { this.setText(choice) }}>
                           <InputGroupAddon addonType="prepend">{choice}</InputGroupAddon>
-                          <Input style={{cursor: "pointer"}} value={hashedChoice} readOnly />
+                          <Input style={{ cursor: "pointer", overflowX: 'scroll' }} value={hashedChoice} readOnly />
                         </InputGroup>
                         <Label>密碼的雜湊值</Label><br />
                         <Input type="text" value={hashedSecret} readOnly />
-                        <Label>這是第{`${ballotIdx+1}`}張選票，{numChoice===-1?"是一張廢票":`投給了 ${numChoice+1}.`} <i style={{color: 'gray'}}>{`${data.twoStageElection.choices[choice]}`}</i></Label>
+                        <Label>這是第{`${ballotIdx + 1}`}張選票，{numChoice === -1 ? "是一張廢票" : `投給了 ${numChoice + 1}.`} <i style={{ color: 'gray' }}>{`${data.twoStageElection.choices[choice]}`}</i></Label>
                         <br />
-                        <Input type="text" style={{cursor: "pointer"}} onClick={e => {this.setText(`${hashedSecret}${hashedChoice}`)}} value={data.twoStageElection.commitments[ballotIdx].commitment} readOnly />
+                        <Input type="text" style={{ cursor: "pointer" }} onClick={e => { this.setText(`${hashedSecret}${hashedChoice}`) }} value={data.twoStageElection.commitments[ballotIdx].commitment} readOnly />
                       </Form>
                     )
                   })}
@@ -81,20 +81,20 @@ class Verify extends React.Component {
                 <Col>
                   <h3>Hash Test</h3><br />
                   <Form>
-                    <FormGroup style={{width: "80%", height: "10em"}} >
+                    <FormGroup style={{ width: "80%", height: "10em" }} >
                       <Label for="hashInput">輸入</Label>
-                      <Input type="textarea" id="hashInput" style={{height: "8em", resize: "none"}} value={this.state.input} onChange={this.handleInput} />
+                      <Input type="textarea" id="hashInput" style={{ height: "8em", resize: "none" }} value={this.state.input} onChange={this.handleInput} />
                     </FormGroup>
                     <br />
-                    <FormGroup style={{width: "80%", height: "10em"}} >
+                    <FormGroup style={{ width: "80%", height: "10em" }} >
                       <Label for="hashOutput">雜湊值</Label>
-                      <Input type="textarea" id="hashOutput" style={{height: "8em", resize: "none"}} value={this.state.output} readOnly />
+                      <Input type="textarea" id="hashOutput" style={{ height: "8em", resize: "none" }} value={this.state.output} readOnly />
                     </FormGroup>
                   </Form>
                 </Col>
               </Row>
               <Row>
-                <Link to={`/vote/twoStage/${this.props.electionId}`} style={{margin: 'auto'}} >
+                <Link to={`/vote/twoStage/${this.props.electionId}`} style={{ margin: 'auto' }} >
                   <Button color="secondary">返回</Button>
                 </Link>
               </Row>

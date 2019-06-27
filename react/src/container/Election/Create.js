@@ -39,10 +39,10 @@ const Choices = props => {
 }
 
 const errHandler = error => {
-  if(error && error.message) {
+  if (error && error.message) {
     const msg = error.message;
-    if(msg.search("Title Already Exist") !== -1) return "Some election already used this title!";
-    if(msg.search("Not Login") !== -1) return "Please login first!";
+    if (msg.search("Title Already Exist") !== -1) return "Some election already used this title!";
+    if (msg.search("Not Login") !== -1) return "Please login first!";
   }
   return "Create Election Fail!";
 }
@@ -121,7 +121,7 @@ class CreateElection extends React.Component {
                 })
               }}
             >
-              <h3 className="user-list-title">Launch an Election</h3>
+              <h2 className="user-list-title">Launch an Election</h2>
               <Row>
                 <Col>
                   <FormGroup >
@@ -170,7 +170,7 @@ class CreateElection extends React.Component {
                                 <Input addon type="checkbox" onChange={e => {
                                   const check = e.target.checked;
                                   this.setState(state => {
-                                    state.users = state.users.map(user => ({ ...user, included: check}))
+                                    state.users = state.users.map(user => ({ ...user, included: check }))
                                     return state;
                                   })
                                 }} />
@@ -187,7 +187,7 @@ class CreateElection extends React.Component {
                                     <Input addon type="checkbox"
                                       checked={this.state.users[idx].included}
                                       id={`Check_${idx}`}
-                                      onChange={this.handleCheck} 
+                                      onChange={this.handleCheck}
                                     />
                                   </InputGroupText>
                                 </InputGroupAddon>
@@ -223,7 +223,7 @@ class CreateElection extends React.Component {
                   {error ? <Alert color="danger">{errHandler(error)}</Alert> : null}
                   {(data && data.createGeneralElection)
                     ? <Alert color="success">Create election success! <br />
-                        <NavLink to={`/vote/${this.twoStage
+                      <NavLink to={`/vote/${this.twoStage
                         ? "twoStage"
                         : "simple"}/${this.getId(data)}`}>
                         View your election now!
