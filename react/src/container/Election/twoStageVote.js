@@ -16,7 +16,7 @@ class VoteForm extends React.Component {
     this.submit = null;
     this.secret = "";
     this.state = {
-      msg: ""
+      msg: "這是您的驗票密碼，請記好"
     }
   }
 
@@ -195,19 +195,22 @@ class twoStageVote extends React.Component {
                   this.state.commitmentToggled
                     ?
                     <div style={{ wordBreak: 'break-word', width: '40vw' }}>
-                      <font style={{ fontSize: '10pt' }}>這些數字是選票的SHA-512值，可以讓您驗證選票有沒有被竄改 :) <br /></font>
                       {
                         (election.commitments.length === 0)
                           ? (<div>
                             還沒有人投票喔<br />
                             趕快去投票！<br />
                           </div>)
-                          : election.commitments.map((_commitment, idx) => {
-                            return (<>
-                              <span key={_commitment.id}>{idx + 1}. {_commitment.commitment} </span>
-                              <br />
-                            </>);
-                          })
+                          : <div>
+                            <font style={{ fontSize: '10pt' }}>這些數字是選票的SHA-512值，可以讓您驗證選票有沒有被竄改 :) <br /></font>
+                            {election.commitments.map((_commitment, idx) => {
+                              return (<>
+                                <span key={_commitment.id}>{idx + 1}. {_commitment.commitment} </span>
+                                <div style={{ display: 'block', height: '0.4em' }}></div>
+                                <br />
+                              </>);
+                            })
+                            }</div>
                       }
                     </div>
                     :

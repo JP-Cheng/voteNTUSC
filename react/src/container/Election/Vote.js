@@ -135,6 +135,18 @@ class Vote extends React.Component {
                   已有<em>{data.election.ballots.length}/{data.election.voters.length}</em>人投下選票<br /><br />
                   投票{!data.election.open ? "關閉" : "進行"}中<br />
                 </div><br />
+
+
+                {
+                  this.state.toggled
+                    ?
+                    <VoteForm voted={data.election.voted} choices={data.election.choices} electionId={this.props.electionId} />
+                    :
+                    (!data.election.open) ? null : <Button color="primary" disabled={!votable} onClick={this.toggle}>{this.state.toggled ? "返回" : text}</Button>
+                }
+                <br />
+                {/* the div below is for UI setting */}
+                <div style={{ height: '0.4em', display: 'block' }} ></div>
                 {
                   (localStorage['uid'] === data.election.creator.id) ?
                     (
@@ -146,16 +158,6 @@ class Vote extends React.Component {
                       </React.Fragment>
                     ) :
                     null
-                }
-                <br />
-                {/* the div below is for UI setting */}
-                <div style={{ height: '0.4em', display: 'block' }} ></div>
-                {
-                  this.state.toggled
-                    ?
-                    <VoteForm voted={data.election.voted} choices={data.election.choices} electionId={this.props.electionId} />
-                    :
-                    (!data.election.open) ? null : <Button color="primary" disabled={!votable} onClick={this.toggle}>{this.state.toggled ? "返回" : text}</Button>
                 }
                 <br />
                 {this.state.alert ? <Alert color="dnager">This election has been deleted!</Alert> : null}
