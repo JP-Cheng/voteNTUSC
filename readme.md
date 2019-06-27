@@ -26,7 +26,7 @@ $ npm start
 
 這個專案的前端使用`localhost:3000`，後端使用`localhost:4000`。
 
-## 系統說明
+## 系統說明與特色
 如題所示，這是個投票系統。  
 右上角可以進入自己的頁面與sign in/up或是登出。  
 在主畫面底下有四個按鈕，分別是Elections、Create、users。  
@@ -55,6 +55,7 @@ $ npm start
 - Apollo、graphql: 由於後端有使用到GraphQL，因此在Client的部分有使用到Apollo跟graphql
 - Reactstrap: 我們使用Reactstrap的元件加速前端的開發
 - jsSHA: 在兩階段投票時使用jsSHA在Client端計算雜湊值
+- chart.js: 顯示出結果的甜甜圈(?)圖（Doughnut Chart）。
 
 ### 後端
 - graphql-yoga: 作為後端Server以及與前端的API接口使用
