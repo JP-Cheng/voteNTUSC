@@ -6,7 +6,7 @@ import Auth from './Auth'
 class MyNavbar extends React.Component {
   render() {
     return <div>
-      <Navbar color="light" light expand={true}>
+      <Navbar color="light" light expand={true} className="navbar">
         <Link className="navbar-brand" to="/">E-Voting</Link>
         <Auth />
       </Navbar>

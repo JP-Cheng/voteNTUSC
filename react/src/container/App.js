@@ -23,7 +23,7 @@ class App extends React.Component {
 
         <BrowserRouter basename="">
           <Navbar className="top" />
-
+          {/* <div style={{ height: '0.6vh', display: 'block', backgroundColor: '#f8f9fa' }}></div> */}
           <div className="main">
             <Switch>
               <Route exact path="/" component={TopImg}></Route>
