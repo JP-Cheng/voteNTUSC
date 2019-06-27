@@ -1,7 +1,7 @@
 import React from 'react'
 import { Query, Mutation } from 'react-apollo'
 import { Link } from 'react-router-dom'
-import { Button, Alert } from 'reactstrap'
+import { Button, Alert, Spinner } from 'reactstrap'
 import { TWO_STAGE_ELECTION_QUERY, CREATE_COMMITMENT_MUTATION, CREATE_OPENING_MUTATION, TWO_STAGE_ELECTION_SUBSCRIPTION } from '../../graphql/index'
 import { myHash } from '../../hash'
 import './Vote.css'
@@ -101,7 +101,7 @@ class twoStageVote extends React.Component {
       <Query query={TWO_STAGE_ELECTION_QUERY} variables={{ query: this.props.electionId }}>
         {({ data, loading, error, subscribeToMore }) => {
           if (error) return <h1>Error!</h1>;
-          if (loading || !(data.twoStageElection)) return <h1>Loading...</h1>;
+          if (loading || !(data.twoStageElection)) return <Spinner color="primary" />;
           let election = data.twoStageElection;
           
           subscribeToMore({

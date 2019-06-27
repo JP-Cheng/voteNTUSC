@@ -2,7 +2,8 @@ import React from 'react'
 import { Query } from 'react-apollo'
 import {
   Card, CardText, CardBody,
-  CardTitle, CardSubtitle, Button
+  CardTitle, CardSubtitle, Button,
+  Spinner
 } from 'reactstrap'
 import { Link } from 'react-router-dom'
 import { ALL_ELECTIONS_QUERY, ALL_ELECTIONS_SUBSCRIPTION } from '../../graphql/index'
@@ -61,7 +62,7 @@ class View extends React.Component {
     return (
       <Query query={ALL_ELECTIONS_QUERY}>
         {({ data, loading, error, subscribeToMore }) => {
-          if (loading || !(data.allElections)) return <h1>Loading...</h1>;
+          if (loading || !(data.allElections)) return <Spinner color="primary" />;
           if (error) {
             console.error(error);
             return <h1>Something went wrong...</h1>;

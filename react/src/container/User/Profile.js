@@ -1,6 +1,6 @@
 import React from 'react'
 import { Query } from 'react-apollo'
-import { Alert } from 'reactstrap'
+import { Alert, Spinner } from 'reactstrap'
 import { USER_QUERY, ALL_ELECTIONS_SUBSCRIPTION } from '../../graphql'
 import ElectionTabs from './ElectionTabs'
 import './user.css'
@@ -49,7 +49,7 @@ const Profile = (props) => {
     <div className="user-list">
       <Query query={USER_QUERY} variables={{ uid: props.uid }}>
         {({ data, loading, error, subscribeToMore }) => {
-          if (loading || (data && !(data.user))) return <h1>Loading...</h1>;
+          if (loading || (data && !(data.user))) return <Spinner color="primary" />;
           if (error) return <Alert color="danger">Loading User Profile Error!</Alert>;
 
           subscribeToMore({

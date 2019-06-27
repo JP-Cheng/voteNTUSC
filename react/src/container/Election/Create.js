@@ -10,7 +10,8 @@ import {
   InputGroup,
   InputGroupAddon,
   InputGroupText,
-  Row, Col
+  Row, Col,
+  Spinner
 } from 'reactstrap'
 import { NavLink } from 'react-router-dom'
 import { CREATE_GENERAL_ELECTION_MUTATION, USERS_QUERY } from '../../graphql'
@@ -151,7 +152,7 @@ class CreateElection extends React.Component {
                     <Label><b>Choose Voters</b></Label>
                     <Query query={USERS_QUERY}>
                       {({ data, loading, error }) => {
-                        if (loading || !(data.users)) return <Label>Loading...</Label>;
+                        if (loading || !(data.users)) return <Spinner color="primary" />;
                         if (error) return <Alert color="danger">Loading User Error!</Alert>;
                         if (this.state.users.length !== data.users.length) {
                           this.setState(state => {
