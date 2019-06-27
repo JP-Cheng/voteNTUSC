@@ -52,8 +52,8 @@ const mutations = {
     }
   `,
   updateElection: `
-    mutation updateElection($id: ID!, $title: String, $body: String, $choices: [String!], $open: Boolean, $voters: [ID!]) {
-      updateElection(id: $id, data: {title: $title, body: $body, open: $open, choices: $choices, voters: $voters}) {
+    mutation updateElection($id: ID!) {
+      updateElection(id: $id) {
         id title body choices open
         creator {
           id
@@ -386,7 +386,7 @@ const mutationTests = db => () => {
       const client2 = new GraphQLClient(endpoint, {
         headers: {'x-token': _users[1].token}
       });
-      await client2.request(mutations.updateElection, {id: electionId, title: "HaHa"})
+      await client2.request(mutations.updateElection, {id: electionId})
       .then(res => assert.isUndefined(res))
       .catch(err => {
         if(err.name === "AssertionError") throw err;
@@ -408,59 +408,6 @@ const mutationTests = db => () => {
       })
     })
 
-    it('UpdateElection should check election not started except close', async () => {
-      const client = new GraphQLClient(endpoint, {
-        headers: {'x-token': _users[0].token}
-      });
-      const newElection = {title: "Test election", body: "Hello world", choices: ["A", "B", "C"], open: true, voters: _users.map(user => user.id.toString())}
-     
-      const electionId = await client.request(mutations.createElection, newElection)
-      .then(data => data.createElection.id);
-      
-      const found = await db.elections.findById(electionId)
-      .then(found => {
-        found.voted.push(_users[1].id) // Fake Ballot
-        found.markModified('voted');
-        return found;
-      })
-      await found.save();
-      
-      await client.request(mutations.updateElection, {id: electionId, title: "HaHa"})
-      .then(res => {console.log(res); assert.isUndefined(res)})
-      .catch(err => {
-        if(err.name === "AssertionError") throw err;
-        assert.isObject(err.response);
-        expect(err.response.errors[0].message).to.have.string("Started");
-      })
-      
-      await client.request(mutations.updateElection, {id: electionId, open: false})
-      .then(res => {assert.isNotNull(res)})
-      .catch(err => {
-        if(err.name === "AssertionError") throw err;
-        assert.isUndefined(err);
-      })
-    })
-
-    it('UpdateElection should check unique title', async () => {
-      const client = new GraphQLClient(endpoint, {
-        headers: {'x-token': _users[0].token}
-      });
-      const newElection = {title: "Test election", body: "Hello world", choices: ["A", "B", "C"], open: true, voters: _users.map(user => user.id.toString())}
-      
-      const electionId = await client.request(mutations.createElection, newElection)
-      .then(data => data.createElection.id);
-      await client.request(mutations.createElection, {...newElection, title: "HaHa"})
-      .then(res => res);
-      
-      await client.request(mutations.updateElection, {id: electionId, title: "HaHa"})
-      .then(res => assert.isUndefined(res))
-      .catch(err => {
-        if(err.name === "AssertionError") throw err;
-        assert.isObject(err.response);
-        expect(err.response.errors[0].message).to.have.string("Title Already Exist");
-      });
-    })
-
     it('UpdateElection should update DB', async () => {
       const client = new GraphQLClient(endpoint, {
         headers: {'x-token': _users[0].token}
@@ -470,15 +417,11 @@ const mutationTests = db => () => {
       const electionId = await client.request(mutations.createElection, newElection)
       .then(data => data.createElection.id);
 
-      await client.request(mutations.updateElection, {id: electionId, title: "HaHa", body: "LaLa", choices: ["D", "E", "F"], open: false, voters: [_users[1].id]})
+      await client.request(mutations.updateElection, {id: electionId})
       .then(res => {
         assert.isObject(res);
         assert.isObject(res.updateElection);
-        assert.strictEqual(res.updateElection.title, "HaHa");
-        assert.strictEqual(res.updateElection.body, "LaLa");
-        expect(res.updateElection.choices).to.eql(["D", "E", "F"]);
         assert.isFalse(res.updateElection.open);
-        expect(res.updateElection.voters.map(voter => voter.id.toString())).to.have.members([_users[1].id.toString()])
       })
       .catch(err => {
         if(err.name === "AssertionError") throw err;
@@ -488,48 +431,6 @@ const mutationTests = db => () => {
       await db.elections.findById(electionId)
       .then(found => {
         assert.isNotNull(found);
-        assert.strictEqual(found.title, "HaHa");
-        assert.strictEqual(found.body, "LaLa");
-        expect(found.choices).to.eql(["D", "E", "F"]);
-        assert.isFalse(found.open);
-        expect(found.voters.map(id => id.toString())).to.have.members([_users[1].id.toString()]);
-      })
-      .catch(err => {
-        if(err.name === "AssertionError") throw err;
-        assert.isUndefined(err);
-      });
-    })
-
-    it('updateElection should close for started election', async () => {
-      const client = new GraphQLClient(endpoint, {
-        headers: {'x-token': _users[0].token}
-      });
-      const newElection = {title: "Test election", body: "Hello world", choices: ["A", "B", "C"], open: true, voters: _users.map(user => user.id.toString())}
-      
-      const electionId = await client.request(mutations.createElection, newElection)
-      .then(data => data.createElection.id);
-      
-      await db.elections.findById(electionId)
-      .then(found => {
-        found.voted.push(_users[1].id) // Fake Ballot
-        found.markModified('voted');
-        found.save();
-      })
-
-      await client.request(mutations.updateElection, {id: electionId, open: false})
-      .then(res => {
-        assert.isObject(res);
-        assert.isObject(res.updateElection);
-        assert.isFalse(res.updateElection.open);
-      })
-      .catch(err => {
-        if(err.name === "AssertionError") throw err;
-        assert.isUndefined(err);
-      });
-
-      await db.elections.findById(electionId)
-      .then(found => {
-        assert.isNotNull(found);
         assert.isFalse(found.open);
       })
       .catch(err => {
@@ -537,7 +438,6 @@ const mutationTests = db => () => {
         assert.isUndefined(err);
       });
     })
-
 
   })
 
