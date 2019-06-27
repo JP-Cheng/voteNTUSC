@@ -17,7 +17,7 @@ class VoteForm extends React.Component {
     this.submit = null;
     this.secret = "";
     this.state = {
-      msg: "這是您的驗票密碼，請記好"
+      msg: "這是您的驗票密碼"
     }
   }
 
@@ -209,7 +209,7 @@ class twoStageVote extends React.Component {
                 {
                   (election.state === "CLOSE" || election.state === "COMMIT")
                     ? null
-                    : <div className="chart.js.test" style={{ display: 'block' }}>
+                    : <div className="chart" style={{ display: 'block' }}>
                       <h6>result chart</h6>
                       <Doughnut data={chartData} />
                     </div>
@@ -235,7 +235,8 @@ class twoStageVote extends React.Component {
                     ?
                     <VoteForm stage={election.state} choices={election.choices} electionId={this.props.electionId} />
                     :
-                    (election.state === "END" || election.state === "CLOSE") ? null : <Button color="primary" style={{ marginBottom: '0.5em' }} disabled={!votable} onClick={this.toggle}>{text}</Button>
+                    (election.state === "END" || election.state === "CLOSE")
+                      ? null : <Button color="primary" style={{ marginBottom: '0.5em' }} disabled={!votable} onClick={this.toggle}>{text}</Button>
                 }
                 <br />
                 <Button color="info" disabled={election.state === "CLOSE"} onClick={this.commitmentToggle} >

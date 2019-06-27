@@ -8,9 +8,9 @@
     "server": "cd graphqlBackend && npm start",
     "start": "concurrently \"npm run server\" \"npm run client\"",
     "test": "echo \"Error: no test specified\" && exit 1",
-	"setupClient": "cd react && npm install",
-	"setupServer": "cd graphqlBackend && npm install",
-	"setup": "concurrently \"npm run setupServer\" \"npm run setupClient\""
+    "setupClient": "cd react && npm install",
+    "setupServer": "cd graphqlBackend && npm install",
+    "setup": "concurrently \"npm run setupServer\" \"npm run setupClient\""
   },
   "keywords": [],
   "author": "",

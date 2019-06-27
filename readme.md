@@ -1,16 +1,11 @@
-心得
-影片 - 架構 - deploy
-
-
-
-# An Online Voting System
+# E-Voting System
 
 ## 一句話描述這個專題
 一個具備驗證性與一點點匿名性的線上投票系統  
 This is the [deployed link](https://e-voting-web-final.herokuapp.com).
 
-## usage
-### setup
+## Usage
+### Setup
 Run the following command to setup the project:  
 
 ```
@@ -18,7 +13,7 @@ $ npm install
 $ npm run setup  
 ```  
 
-### run the project
+### Run the project
 
 ```
 $ npm start
@@ -28,20 +23,37 @@ $ npm start
 
 ## 系統說明與特色
 如題所示，這是個投票系統。  
-右上角可以進入自己的頁面與sign in/up或是登出。  
-在主畫面底下有四個按鈕，分別是Elections、Create、users。  
-所有的頁面都是直觀的使用就可以。
+右上角可以進入自己的頁面與Login/Register或是登出。  
+在主畫面底下有三個按鈕，分別是Elections、Create、Users，可以在這三個頁面中投票、建立投票與瀏覽使用者資訊。
 
-### hash
-除了一般的投票（like FB民調）之外，我們設計了一個two-stage election，可以設定自己的密碼。投票的過程會產生：  
+### 投票系統
+我們實作了兩個投票系統  
 
-1. SHA3-512(the voted ballot)  
-2. SHA3-512(password)  
-3. SHA3-512(the concation of the result of 1, 2)  
+1. 一般的投票（類似FB民調）
+    這種選舉會在使用者投出一張選票號立即更新投票結果，跟一般網路上常見的投票方式一樣，雖然方便但不具有匿名性與驗證性
+2. 兩階段選舉(Two-Stage Election)
+    此種選舉有**投票**跟**開票**兩個階段，在投票時使用者需要投出選票的雜湊值(Commitment)，此時只有使用者自己知道他投出的選項，後端無法得知選票內容。在第二階段時，使用者必須提交當初的選票內容作為開票證明(Opening)，為了確保匿名性，這個時候會強制使用者登出。
 
-在投完票之後，進到驗票的畫面，有個hash test，可以輸入自己的密碼得到雜湊值，並比較自己所投的票，就知道有沒有被竄改。  
+選票設計如下：
 
-### the voting page
+```
+Choice: Int -> 代表這張選票投出的選項
+Secret: Data -> 產生Commitment所需的密碼
+Commitment: Hash( Hash(Secret) || Hash(Choice) ) -> 實際投出的選票
+Opening: ( Hash(Secret), Choice ) -> 開票證明
+```
+
+方便起見，在此使用的Hash Function為SHA3-512，它可以被任何一種安全的雜湊函數代替。
+
+在Commitment的數值確定之後，如果一個使用者反悔將Choice的數值改變，則他必須找到另外一個Secret使這兩張選票的Commitment相同，這也代表他必須找出SHA3-512的碰撞，以目前的技術而言是不可能的事情，而這也代表著Server無法操控選舉結果。
+
+使用者投出Commitment後，Server會立即將選票公布出來，讓選民驗證自己的選票有被正確儲存。在開票時，Server會公布已開出的選票的Opening，讓使用者驗證自己的選票有被正確計算在選舉結果中，同時驗證別張選票的開票結果。
+
+#### 為何只有一點點匿名性？
+
+在投下Commitment時為了確保選民身份，還是會要求需登入才能投票，這時Server可以紀錄下Commitment與身份的對應關係，因此會破壞匿名性。未來可以加入Mix network等系統減弱選票與身份之間的關聯性，加強匿名性。
+
+### Voting Page
 建立投票的人可以直接在voting page開票或刪除，也可以在使用者頁面進行。  
 
 ### [chart.js](https://github.com/jerairrest/react-chartjs-2)
@@ -69,7 +81,7 @@ $ npm start
 - chai: 用來做測試驗證
 - graphql-request: 後端測試時使用的GraphQL Client
 
-### setup
+### Setup
 - concurrently：可以直接使`npm run <some script>`或是`npm start`來同時操作前後端。
 
 ## 每位組員之貢獻
@@ -84,4 +96,3 @@ $ npm start
 2. 關於資料庫的部分其實講得頗少，主要還是focus在前後端的操作，但是如果不串接資料庫的話，在後續的應用幾乎做不出什麼東西，希望這部分可以多講一點。  
 3. 後端的部分講了很多技術跟架構，但其實不可能每個都學會，所以還是希望可以向前端一樣，集中某樣東西多講一點。  
 4. 感覺HW/Practice大部分集中在前幾週（只有HW3在後半學期...），而且也集中在前端的架構，希望可以分散一部分到後面幾週（不過後半學期每堂課都在交作業，還是可以不用分太多，不然大家會死掉吧XD），才不會前半學期累得要死，後半學期也沒什麼練習到。  
-
