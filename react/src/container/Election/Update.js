@@ -34,6 +34,7 @@ class Update extends React.Component {
           if (error) console.error(error);
 
           let msg = "";
+          let btn = "";
           if (simple) {
             if (this.props.open) {
               msg = "close the election";
@@ -41,15 +42,15 @@ class Update extends React.Component {
             else msg = "open the election"
           }
           else {
-            if (this.props.state === "CLOSE") msg = "open the election";
-            else if (this.props.state === "COMMIT") msg = "stop the election and start counting ballots";
-            else if (this.props.state === "OPEN") msg = "end the election";
+            if (this.props.state === "CLOSE") { msg = "open the election"; btn = "開始投票"; }
+            else if (this.props.state === "COMMIT") { msg = "stop the election and start counting ballots"; btn = "開始開票"; }
+            else if (this.props.state === "OPEN") { msg = "end the election"; btn = "關閉投票"; }
             else msg = "make no change";
           }
 
           return (
             <div>
-              <Button color="info" onClick={this.toggle}>{simple ? (this.props.open ? "Close" : "Open") : "Next State"}</Button>
+              <Button color="info" onClick={this.toggle}>{simple ? (this.props.open ? "Close" : "Open") : `${btn}`}</Button>
               <Modal isOpen={this.state.modal} toggle={this.toggle}>
                 <ModalHeader toggle={this.toggle}>Wait!</ModalHeader>
                 <ModalBody>

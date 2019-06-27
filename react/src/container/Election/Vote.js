@@ -151,7 +151,7 @@ class Vote extends React.Component {
                   (localStorage['uid'] === data.election.creator.id) ?
                     (
                       <React.Fragment>
-                        <Update electionId={data.election.id} type={data.election.type} open={data.election.open} state={data.election.state} />
+                        <Update electionId={data.election.id} type="simpleElection" open={data.election.open} state={data.election.state} />
                         {/* the div below is for UI setting */}
                         <div style={{ height: '0.4em', display: 'block' }} ></div>
                         <Delete electionId={data.election.id} type={data.election.type} />

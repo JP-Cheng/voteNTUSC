@@ -217,11 +217,18 @@ class twoStageVote extends React.Component {
                     null
                 }
                 <br />
+                {(election.state === "CLOSE" || election.state === "COMMIT")?
+                  null:
+                  <Link to={`/verify/${this.props.electionId}`}>
+                    <Button color="success">驗票</Button>
+                  </Link>
+                }
+                <br />
                 {
                   (localStorage['uid'] === election.creator.id) ?
                     (
                       <React.Fragment>
-                        <Update electionId={election.id} type={election.type} open={election.open} state={election.state} />
+                        <Update electionId={election.id} type="twoStageElection" open={election.open} state={election.state} />
                         {/* the div below is for UI setting */}
                         <div style={{ height: '0.4em', display: 'block' }} ></div>
                         <Delete electionId={election.id} type={election.type} />
