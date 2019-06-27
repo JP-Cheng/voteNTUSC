@@ -3,6 +3,7 @@ import { Query, Mutation } from 'react-apollo'
 import { ELECTION_QUERY, ELECTION_SUBSCRIPTION, CREATE_BALLOT_MUTATION } from '../../graphql/index'
 import { Button, Alert, Spinner } from 'reactstrap'
 import { Update, Delete } from '.'
+import { Doughnut } from 'react-chartjs-2'
 import './Vote.css'
 
 const countVote = (id, ballots) => ballots.filter(ballot => ballot.choice === id).length;
@@ -110,6 +111,40 @@ class Vote extends React.Component {
             text = "參與投票";
           }
 
+          const { election } = data;
+          const chartData = {
+            labels: [...election.choices, "廢票"],
+            datasets: [{
+              data: election.choices.map((choice, idx) => {
+                return countVote(idx, election.ballots);
+              }).concat(countVote(-1, election.ballots)),
+              backgroundColor: [
+                '#FF6384',
+                '#36A2EB',
+                '#FFCE56',
+                '#ffffff',
+                '#DDDDDD',
+                '#FFFF99',
+                '#FFCCCC',
+                '#A6CAF0',
+                '#F5DEB3',
+                '#9999ff'
+              ],
+              hoverBackgroundColor: [
+                '#FF6384',
+                '#36A2EB',
+                '#FFCE56',
+                '#ffffff',
+                '#DDDDDD',
+                '#FFFF99',
+                '#FFCCCC',
+                '#A6CAF0',
+                '#F5DEB3',
+                '#9999ff'
+              ]
+            }]
+          };
+
           return (
             <div className="election-card">
               <div className="election-title">
@@ -121,13 +156,23 @@ class Vote extends React.Component {
               <br />
 
               <div className="election-body">
+                {(!election.open && election.ballots.length !== 0)
+                  ? <>
+                    <div className="chart.js.test" style={{ display: 'block' }}>
+                      <h6>result chart</h6>
+                      <Doughnut data={chartData} />
+                    </div>
+                    <br />
+                  </>
+                  : null
+                }
                 <div className="election-choices">
                   <span className="election-info">這個選舉有以下這些選項：</span><br />
                   {data.election.choices.map((choice, idx) => {
-                    return (<>
-                      <div className="aChoice" key={idx}>{idx + 1}. {choice} ({countVote(idx, data.election.ballots)}) </div>
+                    return (<React.Fragment key={idx}>
+                      <div className="aChoice" >{idx + 1}. {choice} ({countVote(idx, data.election.ballots)}) </div>
                       <br />
-                    </>)
+                    </React.Fragment>)
                   })}
                   <div className="aChoice">{`${data.election.choices.length + 1}. 廢票 (${countVote(-1, data.election.ballots)})`}</div>
                 </div><br /><br />

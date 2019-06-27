@@ -2,6 +2,7 @@ import React from 'react'
 import { Query, Mutation } from 'react-apollo'
 import { Link } from 'react-router-dom'
 import { Button, Alert, Spinner } from 'reactstrap'
+import { Doughnut } from 'react-chartjs-2';
 import { TWO_STAGE_ELECTION_QUERY, CREATE_COMMITMENT_MUTATION, CREATE_OPENING_MUTATION, TWO_STAGE_ELECTION_SUBSCRIPTION } from '../../graphql/index'
 import { myHash } from '../../hash'
 import './Vote.css'
@@ -161,6 +162,39 @@ class twoStageVote extends React.Component {
             text = "你不是選民";
           }
 
+          const chartData = {
+            labels: [...election.choices, "廢票"],
+            datasets: [{
+              data: election.choices.map((choice, idx) => {
+                return countVote(idx, election.ballots);
+              }).concat(countVote(-1, election.ballots)),
+              backgroundColor: [
+                '#FF6384',
+                '#36A2EB',
+                '#FFCE56',
+                '#ffffff',
+                '#DDDDDD',
+                '#FFFF99',
+                '#FFCCCC',
+                '#A6CAF0',
+                '#F5DEB3',
+                '#9999ff'
+              ],
+              hoverBackgroundColor: [
+                '#FF6384',
+                '#36A2EB',
+                '#FFCE56',
+                '#ffffff',
+                '#DDDDDD',
+                '#FFFF99',
+                '#FFCCCC',
+                '#A6CAF0',
+                '#F5DEB3',
+                '#9999ff'
+              ]
+            }]
+          };
+
           return (
             <div className="election-card">
               <div className="election-title">
@@ -172,13 +206,22 @@ class twoStageVote extends React.Component {
               <br />
 
               <div className="election-body">
+                {
+                  (election.state === "CLOSE" || election.state === "COMMIT")
+                    ? null
+                    : <div className="chart.js.test" style={{ display: 'block' }}>
+                      <h6>result chart</h6>
+                      <Doughnut data={chartData} />
+                    </div>
+                }
+                <br />
                 <div className="election-choices">
                   <span className="election-info">這個選舉有以下這些選項：</span><br />
                   {election.choices.map((choice, idx) => {
-                    return (<>
-                      <div className="aChoice" key={idx}>{idx + 1}. {choice} ({countVote(idx, election.ballots)}) </div>
+                    return (<React.Fragment key={idx}>
+                      <div className="aChoice">{idx + 1}. {choice} ({countVote(idx, election.ballots)}) </div>
                       <br />
-                    </>)
+                    </React.Fragment>)
                   })}
                   <div className="aChoice">{`${election.choices.length + 1}. 廢票 (${countVote(-1, election.ballots)})`}</div>
                 </div><br /><br />
@@ -211,11 +254,11 @@ class twoStageVote extends React.Component {
                           : <div>
                             <font style={{ fontSize: '10pt' }}>這些數字是選票的SHA3-512值，可以讓您驗證選票有沒有被竄改 :) <br /></font>
                             {election.commitments.map((_commitment, idx) => {
-                              return (<>
-                                <span key={_commitment.id}>{idx + 1}. {_commitment.commitment} </span>
+                              return (<React.Fragment key={_commitment.id}>
+                                <span >{idx + 1}. {_commitment.commitment} </span>
                                 <div style={{ display: 'block', height: '0.4em' }}></div>
                                 <br />
-                              </>);
+                              </React.Fragment>);
                             })
                             }</div>
                       }
@@ -224,22 +267,22 @@ class twoStageVote extends React.Component {
                     null
                 }
                 <div style={{ display: 'block', height: '0.4em' }}></div>
-                {(election.state === "CLOSE" || election.state === "COMMIT")?
-                  null:
+                {(election.state === "CLOSE" || election.state === "COMMIT") ?
+                  null :
                   <React.Fragment>
                     <Link to={`/verify/${this.props.electionId}`}>
                       <Button color="success">驗票</Button>
                     </Link>
                     <div style={{ display: 'block', height: '0.4em' }}></div>
-                  </React.Fragment>  
+                  </React.Fragment>
                 }
                 {
                   (localStorage['uid'] === election.creator.id) ?
                     (
                       <React.Fragment>
-                        {election.state !== "END"?<Update electionId={election.id} type="twoStageElection" open={election.open} state={election.state} />:null}
+                        {election.state !== "END" ? <Update electionId={election.id} type="twoStageElection" open={election.open} state={election.state} /> : null}
                         {/* the div below is for UI setting */}
-                        {election.state !== "END"?<div style={{ height: '0.4em', display: 'block' }} ></div>:null}
+                        {election.state !== "END" ? <div style={{ height: '0.4em', display: 'block' }} ></div> : null}
                         <Delete electionId={election.id} type={election.type} />
                       </React.Fragment>
                     ) :
