@@ -52,7 +52,7 @@ class VoteForm extends React.Component {
           return (
             <div className="election-ballot">
               投下神聖的一票：<br />
-              {`${commit ? "設定" : ""}密碼: `}<input type="text" placeholder={this.state.msg} onChange={this.handleSecret} /><br />
+              {`${commit ? "設定" : ""}密碼: `}<input type="password" placeholder={this.state.msg} onChange={this.handleSecret} /><br />
               {this.props.choices.map((choice, idx) => {
                 return (<>
                   <Button className="aChoice" color="info" id={idx} key={idx} onClick={this.handleVote}>{idx + 1}. {choice}</Button>
@@ -94,8 +94,11 @@ class twoStageVote extends React.Component {
   }
 
   isVoted = voted => {
-    if (voted.find(({ id }) => id === localStorage.uid)) return true;
-    else return false;
+    return voted.find(({ id }) => id === localStorage.uid)
+  }
+
+  isVotable = voters => {
+    return voters.find(({ id }) => id === localStorage.uid);
   }
 
   render() {
@@ -149,9 +152,13 @@ class twoStageVote extends React.Component {
             votable = false;
             text = "已投票";
           }
-          else {
+          else if (this.isVotable(election.voters)) {
             votable = true;
             text = "參與投票";
+          }
+          else {
+            votable = false;
+            text = "你不是選民";
           }
 
           return (
@@ -188,7 +195,7 @@ class twoStageVote extends React.Component {
                     (election.state === "END" || election.state === "CLOSE") ? null : <Button color="primary" style={{ marginBottom: '0.5em' }} disabled={!votable} onClick={this.toggle}>{text}</Button>
                 }
                 <br />
-                <Button color="info" disabled={election.state === "CLOSE"} onClick={this.commitmentToggle}>
+                <Button color="info" disabled={election.state === "CLOSE"} onClick={this.commitmentToggle} >
                   {this.state.commitmentToggled ? "關閉" : "查看選票"}
                 </Button>
                 {
