@@ -1,6 +1,7 @@
 {
   "name": "midterm",
   "version": "0.1.0",
+  "homepage" : "https://e-voting-web-final.herokuapp.com/",
   "private": true,
   "dependencies": {
     "apollo-boost": "^0.4.2",
