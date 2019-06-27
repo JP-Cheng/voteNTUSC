@@ -202,7 +202,7 @@ class twoStageVote extends React.Component {
                             趕快去投票！<br />
                           </div>)
                           : <div>
-                            <font style={{ fontSize: '10pt' }}>這些數字是選票的SHA-512值，可以讓您驗證選票有沒有被竄改 :) <br /></font>
+                            <font style={{ fontSize: '10pt' }}>這些數字是選票的SHA3-512值，可以讓您驗證選票有沒有被竄改 :) <br /></font>
                             {election.commitments.map((_commitment, idx) => {
                               return (<>
                                 <span key={_commitment.id}>{idx + 1}. {_commitment.commitment} </span>

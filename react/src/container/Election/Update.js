@@ -19,7 +19,7 @@ class Update extends React.Component {
   }
 
   delete = () => {
-    if(this.mutate){
+    if (this.mutate) {
       this.mutate();
     }
     this.toggle();
@@ -28,28 +28,28 @@ class Update extends React.Component {
   render() {
     const simple = this.props.type === "simpleElection";
     return (
-      <Mutation mutation={simple ? UPDATE_ELECTION_MUTATION : UPDATE_TWO_STAGE_ELECTION_MUTATION} variables={{id: this.props.electionId}}>
-        {(deleteElection, {error}) => {
+      <Mutation mutation={simple ? UPDATE_ELECTION_MUTATION : UPDATE_TWO_STAGE_ELECTION_MUTATION} variables={{ id: this.props.electionId }}>
+        {(deleteElection, { error }) => {
           this.mutate = deleteElection;
-          if(error) console.error(error);
-          
+          if (error) console.error(error);
+
           let msg = "";
-          if(simple) {
-            if(this.props.open) {
+          if (simple) {
+            if (this.props.open) {
               msg = "close the election";
             }
             else msg = "open the election"
           }
           else {
-            if(this.props.state === "CLOSE") msg = "open the election";
-            else if(this.props.state === "COMMIT") msg = "stop the election and start counting ballots";
-            else if(this.props.state === "OPEN") msg = "end the election";
+            if (this.props.state === "CLOSE") msg = "open the election";
+            else if (this.props.state === "COMMIT") msg = "stop the election and start counting ballots";
+            else if (this.props.state === "OPEN") msg = "end the election";
             else msg = "make no change";
           }
 
           return (
             <div>
-              <Button color="info" onClick={this.toggle}>{simple?(this.props.open?"Close":"Open"):"Next State"}</Button>
+              <Button color="info" onClick={this.toggle}>{simple ? (this.props.open ? "Close" : "Open") : "Next State"}</Button>
               <Modal isOpen={this.state.modal} toggle={this.toggle}>
                 <ModalHeader toggle={this.toggle}>Wait!</ModalHeader>
                 <ModalBody>
