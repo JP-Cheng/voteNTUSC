@@ -188,7 +188,7 @@ class twoStageVote extends React.Component {
                     (election.state === "END" || election.state === "CLOSE") ? null : <Button color="primary" style={{ marginBottom: '0.5em' }} disabled={!votable} onClick={this.toggle}>{text}</Button>
                 }
                 <br />
-                <Button style={{ marginBottom: '0.5em' }} color="info" disabled={election.state === "CLOSE"} onClick={this.commitmentToggle}>
+                <Button color="info" disabled={election.state === "CLOSE"} onClick={this.commitmentToggle}>
                   {this.state.commitmentToggled ? "關閉" : "查看選票"}
                 </Button>
                 {
@@ -216,14 +216,13 @@ class twoStageVote extends React.Component {
                     :
                     null
                 }
-                <br />
+                <div style={{ display: 'block', height: '0.4em' }}></div>
                 {(election.state === "CLOSE" || election.state === "COMMIT")?
                   null:
                   <Link to={`/verify/${this.props.electionId}`}>
                     <Button color="success">驗票</Button>
                   </Link>
                 }
-                <br />
                 {
                   (localStorage['uid'] === election.creator.id) ?
                     (
