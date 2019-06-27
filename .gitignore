@@ -10,5 +10,8 @@
 # unused, untracked
 /expressBackEnd/*
 
+# demo video
+*.mov
+
 # misc
 .DS_Store

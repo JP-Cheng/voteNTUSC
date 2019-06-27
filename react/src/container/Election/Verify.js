@@ -67,7 +67,7 @@ class Verify extends React.Component {
                         <Label>投下的選項</Label><br />
                         <InputGroup style={{ cursor: "pointer", marginBottom: "0.6em" }} onClick={_ => { this.setText(choice) }}>
                           <InputGroupAddon addonType="prepend">{choice}</InputGroupAddon>
-                          <Input style={{ cursor: "pointer", overflowX: 'scroll' }} value={hashedChoice} readOnly />
+                          <Input style={{ cursor: "pointer" }} value={hashedChoice} readOnly />
                         </InputGroup>
                         <Label>密碼的雜湊值</Label><br />
                         <Input type="text" value={hashedSecret} readOnly />

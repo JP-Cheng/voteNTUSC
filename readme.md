@@ -1,34 +1,87 @@
-# An Online Voting System for NTUSC
+心得
+影片 - 架構 - deploy
+
+
+
+# An Online Voting System
 
 ## 一句話描述這個專題
-嗯，就是個給學代會用的線上投票系統XD
+一個具備驗證性與一點點匿名性的線上投票系統  
+This is the [deployed link](https://e-voting-web-final.herokuapp.com).
 
 
 ## 動機
 是這樣的，因為我在學代會裡面也有一段時間（雖然這學期不是學代），每次投票的時候都會一片混亂，而且大家會為了串連而不在固定位置。雖然這個專題只是當初不知道期中專題要做什麼的產物啦，但主要還是希望能讓學代跟秘書們能夠不用走動，在自己的手機上就可以投票，所以在設計UI的時候納入了很多行動裝置的考慮。本來的設計是有管理者權限（正副議長、秘書長、root帳號）可以launch a vote，但是因為還沒跟資料庫串連（跟DB不熟嗚嗚），也還沒有教cookie/session怎麼實作，所以這個部分還沒完成，希望留待期末專題。
 
 
-## 啟動方式
-在這個dir、以及`./react`跟`./expressBackend`裡面分別使用  
+## usage
+### setup
+Run the following command to setup the project:  
+
 ```
-$npm install
+$ npm install   
+$ npm run setup  
 ```  
-之後，回到最上層的dir輸入  
+
+### run the project
+
 ```
-$npm start
-```  
-就可以了。這個專案的前端使用`localhost:3000`，後端使用`localhost:7777`。
+$ npm start
+```
+
+這個專案的前端使用`localhost:3000`，後端使用`localhost:4000`。
 
 ## 系統說明
-如題所示，這是個投票系統，在主畫面底下有四個按鈕，分別是投票頁面、結果頁面、不同投票主題以及登出。登出就是回到主畫面，因為現在還沒有真的登入；不同投票主題預計可以看到每個主題的投票結果，不過目前也還沒有實作出來（因為沒有串接資料庫），不過預想的結果會跟第二個的投票結果頁面一樣，因此做一個當代表就可以了；結果頁面目前是寫死的投票結果，這個頁面顯示最近一次的投票數據，並自動計算出結果（pass/oppose/chair's decision）；投票頁面就是讓人投票的頁面，按下任何一個選項都會顯示成功投票的頁面。
+如題所示，這是個投票系統。  
+右上角可以進入自己的頁面與sign in/up或是登出。  
+在主畫面底下有四個按鈕，分別是Elections、Create、users。  
+所有的頁面都是直觀的使用就可以。
+
+### feature
+除了一般的投票（like FB民調）之外，我們設計了一個two-stage election，可以設定自己的密碼。投票的過程會產生：
+
+1. SHA3-512(the voted ballot)
+2. SHA3-512(password)
+3. SHA3-512(the concation of the result of 1, 2)  
+
+在投完票之後，進到驗票的畫面，有個hash test，可以輸入自己的密碼得到雜湊值，並比較自己所投的票，就知道有沒有被竄改。
+
+### the voting page
+建立投票的人可以直接在voting page開票或刪除，也可以在使用者頁面進行。
+
+## 使用與參考之框架/模組/原始碼
+
+### 前端
+- React: 我們的前端是以React開發
+- Apollo、graphql: 由於後端有使用到GraphQL，因此在Client的部分有使用到Apollo跟graphql
+- Reactstrap: 我們使用Reactstrap的元件加速前端的開發
+- jsSHA: 在兩階段投票時使用jsSHA在Client端計算雜湊值
+
+### 後端
+- graphql-yoga: 作為後端Server以及與前端的API接口使用
+- bcrypt: 用來計算使用者密碼的雜湊值
+- JsonWebToken: 加密Session資訊，讓Server端不需要保留Session的內容
+- jsSHA: 開票時用來計算開票內容的雜湊值
+- mongoose: 連接MongoDB資料庫
+- babel: 用來轉換ES6的Javascript
+- nodemon: 方便後端開發
+- mocha: 作為後端測試框架
+- chai: 用來做測試驗證
+- graphql-request: 後端測試時使用的GraphQL Client
+
+### setup
+- concurrently：可以直接使`npm run <some script>`或是`npm start`來同時操作前後端。
 
 ## 未來展望
-這是個為了避免期末專題也不知道要做什麼、反正既然有點實用就不如也拿來做期末專題的專題XD。  
-最初的發想是希望大家可以直接刷學生證簽到、簽退跟授權（登入系統），所以希望可以跟一些嵌入式裝置串連（for RFID）；跟資料庫串接；部署在某個固定主機或雲端服務上。  
-另外，考慮到使用者體驗，希望能將表決結果圖像化，目前考慮串接的是`chart.js`，不過還沒有弄好。
+考慮到使用者體驗，希望能將表決結果圖像化，目前考慮串接的是`chart.js`，不過還沒有弄好。
 
-## 我的貢獻
-除了圖片都是網路上抓的、後端的express大部分是既有的程式碼之外（我在這邊只有把`cors`寫進去，以及寫死一些資料），其他全部都是我手動刻出來的（包含所有的排版跟css）。除了react跟express自帶的模組之外，另外有安裝`cors, nodemon, concurrently`等npm模組，詳情可見三個目錄底下的`package.json`。
+## 每位組員之貢獻
+鄭景平主要負責前端、UI。  
+王秉倫主要負責後端與部分前端。  
+詳情可以參見[github commits page](https://github.com/JP-Cheng/voteNTUSC/commits/master)。
 
 ## 心得
-網頁真的是要學很多東西，不過經過這次的專案，至少把react都摸熟了，希望之後能夠更熟悉後端以及資料流。
+
+## 課程建議
+1. 
+
