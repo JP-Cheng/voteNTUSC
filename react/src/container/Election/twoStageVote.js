@@ -2,9 +2,11 @@ import React from 'react'
 import { Query, Mutation } from 'react-apollo'
 import { Link } from 'react-router-dom'
 import { Button, Alert } from 'reactstrap'
-import { TWO_STAGE_ELECTION_QUERY, CREATE_COMMITMENT_MUTATION, CREATE_OPENING_MUTATION, TWO_STAGE_ELECTION_SUBSCRIPTION } from '../../graphql/index'
+import { ME_QUERY, TWO_STAGE_ELECTION_QUERY, CREATE_COMMITMENT_MUTATION, CREATE_OPENING_MUTATION, TWO_STAGE_ELECTION_SUBSCRIPTION } from '../../graphql/index'
 import { myHash } from '../../hash'
 import './Vote.css'
+import Update from './Update'
+import Delete from './Delete'
 
 const countVote = (id, ballots) => ballots.filter(ballot => ballot.choice === id).length;
 
@@ -103,7 +105,7 @@ class twoStageVote extends React.Component {
           if (error) return <h1>Error!</h1>;
           if (loading || !(data.twoStageElection)) return <h1>Loading...</h1>;
           let election = data.twoStageElection;
-          
+
           subscribeToMore({
             document: TWO_STAGE_ELECTION_SUBSCRIPTION,
             variables: { electionId: this.props.electionId },
@@ -117,7 +119,7 @@ class twoStageVote extends React.Component {
                 return prev;
               }
               else {
-                return {twoStageElection: subscriptionData.data.twoStageElection.data};
+                return { twoStageElection: subscriptionData.data.twoStageElection.data };
               }
             }
           })
@@ -176,42 +178,56 @@ class twoStageVote extends React.Component {
                 <div className="election-info">
                   已有<em>{election.voted.length}/{election.voters.length}</em>人投下選票<br />
                   已有<em>{election.openings.length}/{election.commitments.length}</em>張選票開出<br /><br />
-                  投票{(election.state === "END" || election.state === "CLOSE")?text:"進行中"}
+                  投票{(election.state === "END" || election.state === "CLOSE") ? text : "進行中"}
                 </div><br />
                 {
                   this.state.toggled
                     ?
                     <VoteForm stage={election.state} choices={election.choices} electionId={this.props.electionId} />
                     :
-                    (election.state === "END" || election.state === "CLOSE")?null:<Button color="primary" style={{marginBottom: '0.5em'}} disabled={!votable} onClick={this.toggle}>{text}</Button>
+                    (election.state === "END" || election.state === "CLOSE") ? null : <Button color="primary" style={{ marginBottom: '0.5em' }} disabled={!votable} onClick={this.toggle}>{text}</Button>
                 }
                 <br />
-                <Button style={{marginBottom: '0.5em'}} color="info" disabled={election.state === "CLOSE"} onClick={this.commitmentToggle}>
+                <Button style={{ marginBottom: '0.5em' }} color="info" disabled={election.state === "CLOSE"} onClick={this.commitmentToggle}>
                   {this.state.commitmentToggled ? "關閉" : "查看選票"}
                 </Button>
                 {
                   this.state.commitmentToggled
                     ?
                     <div style={{ wordBreak: 'break-word', width: '40vw' }}>
-                      {election.commitments.map((_commitment, idx) => {
-                        return (<>
-                          <span key={_commitment.id}>{idx + 1}. {_commitment.commitment} </span>
-                          <br />
-                        </>);
-                      })}
+                      <font style={{ fontSize: '10pt' }}>這些數字是選票的SHA-512值，可以讓您驗證選票有沒有被竄改 :) <br /></font>
+                      {
+                        (election.commitments.length === 0)
+                          ? (<div>
+                            還沒有人投票喔<br />
+                            趕快去投票！<br />
+                          </div>)
+                          : election.commitments.map((_commitment, idx) => {
+                            return (<>
+                              <span key={_commitment.id}>{idx + 1}. {_commitment.commitment} </span>
+                              <br />
+                            </>);
+                          })
+                      }
                     </div>
                     :
                     null
                 }
                 <br />
-                {(election.state === "CLOSE" || election.state === "COMMIT")?
-                  null:
-                  <Link to={`/verify/${this.props.electionId}`}>
-                    <Button color="success">驗票</Button>
-                  </Link>
+                {
+                  (localStorage['uid'] === election.creator.id) ?
+                    (
+                      <React.Fragment>
+                        <Update electionId={election.id} type={election.type} open={election.open} state={election.state} />
+                        {/* the div below is for UI setting */}
+                        <div style={{ height: '0.4em', display: 'block' }} ></div>
+                        <Delete electionId={election.id} type={election.type} />
+                      </React.Fragment>
+                    ) :
+                    null
                 }
                 <br />
-                {this.state.alert?<Alert color="danger">This election has been deleted!</Alert>:null}
+                {this.state.alert ? <Alert color="danger">This election has been deleted!</Alert> : null}
               </div>
             </div>
           )

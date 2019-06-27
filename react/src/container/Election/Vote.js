@@ -2,6 +2,7 @@ import React from 'react'
 import { Query, Mutation } from 'react-apollo'
 import { ELECTION_QUERY, ELECTION_SUBSCRIPTION, CREATE_BALLOT_MUTATION } from '../../graphql/index'
 import { Button, Alert } from 'reactstrap'
+import { Update, Delete } from '.'
 import './Vote.css'
 
 const countVote = (id, ballots) => ballots.filter(ballot => ballot.choice === id).length;
@@ -74,20 +75,20 @@ class Vote extends React.Component {
         {({ data, loading, error, subscribeToMore }) => {
           if (error) return <h1>Election Not Found</h1>;
           if (loading || !(data.election)) return <h1>Loading...</h1>;
-          
+
           subscribeToMore({
             document: ELECTION_SUBSCRIPTION,
             variables: { electionId: data.election.id },
             updateQuery: (prev, { subscriptionData }) => {
               if (!(subscriptionData.data) || !(subscriptionData.data.election.mutation)) return prev;
-              if(subscriptionData.data.election.mutation === "DELETED") {
+              if (subscriptionData.data.election.mutation === "DELETED") {
                 this.setState(state => {
                   state.alert = true;
                   return state;
                 })
                 return prev;
               }
-              else return {election: subscriptionData.data.election.data};
+              else return { election: subscriptionData.data.election.data };
             }
           })
 
@@ -132,8 +133,23 @@ class Vote extends React.Component {
                 </div><br /><br />
                 <div className="election-info">
                   已有<em>{data.election.ballots.length}/{data.election.voters.length}</em>人投下選票<br /><br />
-                  投票{!data.election.open?"關閉":"進行"}中<br />
+                  投票{!data.election.open ? "關閉" : "進行"}中<br />
                 </div><br />
+                {
+                  (localStorage['uid'] === data.election.creator.id) ?
+                    (
+                      <React.Fragment>
+                        <Update electionId={data.election.id} type={data.election.type} open={data.election.open} state={data.election.state} />
+                        {/* the div below is for UI setting */}
+                        <div style={{ height: '0.4em', display: 'block' }} ></div>
+                        <Delete electionId={data.election.id} type={data.election.type} />
+                      </React.Fragment>
+                    ) :
+                    null
+                }
+                <br />
+                {/* the div below is for UI setting */}
+                <div style={{ height: '0.4em', display: 'block' }} ></div>
                 {
                   this.state.toggled
                     ?
@@ -142,7 +158,7 @@ class Vote extends React.Component {
                     (!data.election.open) ? null : <Button color="primary" disabled={!votable} onClick={this.toggle}>{this.state.toggled ? "返回" : text}</Button>
                 }
                 <br />
-                {this.state.alert?<Alert color="dnager">This election has been deleted!</Alert>:null}
+                {this.state.alert ? <Alert color="dnager">This election has been deleted!</Alert> : null}
               </div>
             </div>
           )

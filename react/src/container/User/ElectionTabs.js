@@ -79,7 +79,9 @@ class ElectionTabs extends React.Component {
               <TabPane tabId={`${idx + 1}`} key={`${idx + 1}`}>
                 <div style={{ width: '100%', textAlign: 'center' }}>
                   {elections.map(generalElection => {
-                    const election = generalElection.type === "simpleElection" ? generalElection.simpleElection : generalElection.twoStageElection;
+                    const election = generalElection.type === "simpleElection"
+                      ? generalElection.simpleElection
+                      : generalElection.twoStageElection;
                     return <ElectionBlock
                       id={election.id}
                       type={generalElection.type}
