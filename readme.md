@@ -2,14 +2,14 @@
 
 ## 一句話描述這個專題
 一個具備驗證性與一點點匿名性的線上投票系統  
-This is the [deployed link](https://e-voting-web-final.herokuapp.com).
-[Demo Video](https://youtu.be/C88RrEIAiXk)
+This is the [deployed link](https://e-voting-web-final.herokuapp.com) and the [Demo Video](https://youtu.be/C88RrEIAiXk).
 
 ## Usage
 
 ### Init
 
-Create `.env` under `/graphqlBackend/` and put the lines below
+Create `.env` under `./graphqlBackend/` and put the lines below
+
 ```bash
 DB_URL="mongodb+srv://myDbAccount:cLJZrlINFIKmnSoh@cluster0-gfsac.gcp.mongodb.net/test?retryWrites=true&w=majority"
 FRONTEND_URL="http://localhost:3000"
@@ -74,8 +74,8 @@ Opening: ( Hash(Secret), Choice ) -> 開票證明
 ### Voting Page
 建立投票的人可以直接在voting page開票或刪除，也可以在使用者頁面進行。  
 
-### [chart.js](https://github.com/jerairrest/react-chartjs-2)
-如果某個議題已經在開票狀態而且總票數不為零，就會顯示出result doughnut chart，最多支援到10個選項（含廢票，超過的話會顯示同一種顏色）。  
+### [react-chartjs-2](https://github.com/jerairrest/react-chartjs-2)
+如果某個議題已經在開票狀態而且總票數不為零，就會顯示出result doughnut chart，最多支援到10個選項（含廢票，超過的話會顯示同一種顏色），如下圖。  
 ![example chart](https://imgur.com/0NcjcjP.png)
 
 ## 使用與參考之框架/模組/原始碼
@@ -85,7 +85,7 @@ Opening: ( Hash(Secret), Choice ) -> 開票證明
 - Apollo、graphql: 由於後端有使用到GraphQL，因此在Client的部分使用了Apollo跟graphql
 - Reactstrap: 利用Reactstrap的元件加速前端的開發
 - jsSHA: 在兩階段投票時使用jsSHA在Client端計算雜湊值
-- chart.js: 顯示出結果的甜甜圈(?)圖（Doughnut Chart）。
+- react-chartjs-2: 顯示出結果的甜甜圈(?)圖（Doughnut Chart）。
 
 ### 後端
 - graphql-yoga: 作為後端Server以及與前端的API接口使用
@@ -106,7 +106,13 @@ Opening: ( Hash(Secret), Choice ) -> 開票證明
 
 ### 鄭景平
 
-主要負責前端、UI。  
+- 前端
+	- 刻一些很難搞的css與頁面排版
+	- 把結果串接到chart.js以呈現doughnut chart
+	- 考慮一些對使用者友善的設計
+	- 當個才剛考完期末考就發現樓下把事情做得差不多的人...... 
+- 其他
+	- 寫一些小小的scripts方便使用者簡單開啟專案
 
 ### 王秉倫
 
@@ -134,6 +140,7 @@ GraphQL真的不是一個容易上手的東西，若沒有Homework3的訓練這�
 當初學Python的時候覺得C++怎麼就只能寫一些演算法之類的無聊東西，不像Python有一堆新潮的Modules可以用，但現在學會JS之後反而覺得Python也只能開發一些在Console上面看的東西不像JS幾乎是什麼都能寫。修完Web之後開發專案的「廣度」擴張不少，以前要寫個有GUI的東西會非常頭痛，現在則是可以立刻用React弄出來，可以實踐更多以前只會放在腦海裡的東西。
 
 ## 課程建議
+
 1. 其實這應該是個可以開設兩學期的課程，要把內容塞在一個學期已經很趕了，希望比較重要的東西可以多給一些課外資源。像是arrow function, map function, React Props/State等等，這些之後會一再重複用到的東西，如果沒有跟上的話，後面幾週根本就不知道在幹嘛。  
 2. 關於資料庫的部分其實講得頗少，主要還是focus在前後端的操作，但是如果不串接資料庫的話，在後續的應用幾乎做不出什麼東西，希望這部分可以多講一點。  
 3. 後端的部分講了很多技術跟架構，但其實不可能每個都學會，所以還是希望可以向前端一樣，集中某樣東西多講一點。  
